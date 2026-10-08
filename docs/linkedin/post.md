@@ -3,6 +3,14 @@
 > Mettre le lien GitHub et le lien de la démo Streamlit **en premier commentaire**
 > (LinkedIn réduit la portée des posts qui contiennent un lien).
 
+## Phrase de présentation (à réutiliser : résumé LinkedIn, CV, portfolio)
+
+> J'ai développé une solution Data Science complète dédiée à la Ligue 1 Côte d'Ivoire :
+> collecte automatisée de 10 saisons (1 934 matchs, 31 clubs), analyses statistiques et
+> de réseau, comparaison de six modèles de Machine Learning en validation temporelle
+> (43,7 % de bons pronostics contre 35,4 % pour la référence), jusqu'au déploiement d'une
+> application interactive.
+
 ---
 
 ⚽ La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe… mais presque personne n'analyse ses données.
@@ -34,15 +42,15 @@ Le meilleur modèle n'est pas le réseau de neurones : c'est un simple score Elo
 → une validation temporelle sur 1 141 matchs : chaque saison est prédite uniquement à partir des précédentes
 → un bootstrap qui montre que le gain est réel, mais qu'une seule saison ne suffit pas à départager les modèles
 
-Avec peu de données (≈ 240 matchs par saison), la rigueur de l'évaluation compte plus que la complexité de l'algorithme. Le réseau de neurones fait mieux que le hasard, mais pas mieux qu'un modèle simple. Je préfère présenter ce résultat honnête plutôt qu'un chiffre gonflé par une fuite de données.
+Avec peu de données (≈ 240 matchs par saison), la rigueur de l'évaluation compte plus que la complexité de l'algorithme. Le réseau de neurones fait mieux que la référence naïve, mais pas mieux qu'un modèle simple. Je préfère présenter ce résultat honnête plutôt qu'un chiffre gonflé par une fuite de données.
 
 🚀 Prochaines étapes : un modèle de Poisson (Dixon-Coles) pour mieux prédire les nuls, et les événements de match (buteurs, cartons) en cours de collecte.
 
 Code, rapport et démo en commentaire 👇
 
-Je recherche une alternance en data science / data engineering : je serais ravi d'échanger !
+COULIBALY ABOUBAKAR — Data Scientist. Ouvert aux échanges et aux opportunités en Data Science.
 
-#DataScience #MachineLearning #Football #CôteDIvoire #Python #SQL #PyTorch #Streamlit #DataEngineering #Alternance
+#DataScience #MachineLearning #Football #CôteDIvoire #Python #SQL #PyTorch #Streamlit #DataEngineering
 
 ---
 
@@ -50,8 +58,8 @@ Je recherche une alternance en data science / data engineering : je serais ravi 
 
 📂 Code : https://github.com/<ton-compte>/ligue1-ci-data
 📊 Démo en ligne : https://<ton-app>.streamlit.app
-📄 Rapport (9 pages) : dans le dépôt, docs/rapport.pdf
+📄 Rapport (10 pages) : dans le dépôt, docs/rapport.pdf
 
 ## Visuel de couverture conseillé
 
-`docs/linkedin/diapos/01.png` (accroche) ou `docs/figures/06_comparaison_modeles.png`.
+`docs/linkedin/diapos/02_carte.png` (carte des clubs) ou `docs/linkedin/diapos/01_intro.png` (identité).

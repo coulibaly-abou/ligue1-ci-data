@@ -9,7 +9,10 @@ SET search_path TO ligue1;
 
 CREATE TABLE ville (
     id_ville      SERIAL PRIMARY KEY,
-    nom           VARCHAR(100) NOT NULL UNIQUE
+    nom           VARCHAR(100) NOT NULL UNIQUE,
+    latitude      NUMERIC(8, 5) CHECK (latitude BETWEEN -90 AND 90),
+    longitude     NUMERIC(8, 5) CHECK (longitude BETWEEN -180 AND 180),
+    url_coordonnees VARCHAR(300)                    -- article Wikipédia d'où viennent lat/lon
 );
 
 CREATE TABLE stade (

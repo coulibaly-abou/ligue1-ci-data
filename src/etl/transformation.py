@@ -408,6 +408,19 @@ def construire_transfert(ctx: Contexte) -> pd.DataFrame:
 
 # ------------------------------------------------------------ assemblage
 
+def ajouter_coordonnees(ctx: Contexte) -> pd.DataFrame:
+    """Latitude / longitude des villes, collectées dans les articles Wikipédia (raw_villes)."""
+    villes = ctx.villes.table()
+    coord = {normaliser(d["ville"]): d for d in ctx.db.raw_villes.find({"statut": "ok"})}
+    for col, champ in (("latitude", "latitude"), ("longitude", "longitude"),
+                       ("url_coordonnees", "url_source")):
+        villes[col] = villes["nom"].map(lambda n, c=champ: coord.get(normaliser(n), {}).get(c))
+    manquantes = villes.loc[villes["latitude"].isna(), "nom"].tolist()
+    if manquantes:
+        ctx.anomalie("ville", "coordonnées absentes", ", ".join(manquantes))
+    return villes
+
+
 def construire_tout(db) -> tuple[dict[str, pd.DataFrame], Contexte]:
     """Toutes les tables, dans l'ordre de chargement (tables référencées d'abord)."""
     ctx = Contexte(db)
@@ -422,7 +435,7 @@ def construire_tout(db) -> tuple[dict[str, pd.DataFrame], Contexte]:
     # ville, stade et club sont construits en dernier : les étapes ci-dessus ont pu y
     # ajouter des lignes (clubs externes des carrières et des transferts)
     tables = {
-        "ville": ctx.villes.table(),
+        "ville": ajouter_coordonnees(ctx),
         "stade": ctx.stades.table(),
         "club": ctx.clubs.table(),
         "saison": construire_saison(match),

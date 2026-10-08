@@ -1,31 +1,48 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from commun import ORANGE, VERT, charger, configurer, pied_de_page
+from commun import ORANGE, VERT, charger, configurer, entete, kpis, pied_de_page, section
 
 configurer()
-st.title("Réseau des clubs : où vont les joueurs ?")
-st.markdown(
-    "<p style='color:#57606A;font-size:1.05rem'>"
-    "Pour les joueurs, agents et recruteurs : quels clubs exposent leurs joueurs, "
-    "vers quels championnats ils partent, et quels clubs restent hors des radars."
-    "</p>", unsafe_allow_html=True)
-st.markdown(
-    "Deux clubs sont reliés quand un joueur passe de l'un à l'autre : **carrières "
-    "Wikipédia** (≈ 460 joueurs et entraîneurs) et **transferts API-Football** (2022 → 2026). "
-    "La taille d'un club = son **PageRank** : un club est central s'il échange des joueurs "
-    "avec d'autres clubs eux-mêmes centraux."
-)
+entete("Réseau des clubs",
+       "Où vont les joueurs ? Quels clubs exposent leurs talents, vers quels championnats "
+       "ils partent, et quels clubs restent hors des radars.")
 
 noeuds = charger("reseau_noeuds")
 aretes = charger("reseau_aretes")
 mvts = charger("reseau_mouvements")
+premier = noeuds.iloc[0]
+second = noeuds.iloc[1]
 
-c1, c2, c3 = st.columns(3)
-c1.metric("Clubs dans le réseau", len(noeuds))
-c2.metric("Mouvements de joueurs", len(mvts))
-c3.metric("Liens club → club", len(aretes))
+kpis([(f"{len(noeuds)}", "clubs dans le réseau (nœuds)"),
+      (f"{len(mvts)}", "mouvements de joueurs"),
+      (f"{len(aretes)}", "liens club → club (relations)"),
+      (f"{noeuds['communaute'].nunique()}", "communautés détectées")])
 
+section("Lecture", "Comment lire ce réseau")
+blocs = [
+    ("Nœuds", ("Chaque point est un club : les clubs de Ligue 1 ivoirienne (orange) et les "
+              "clubs où leurs joueurs sont passés (vert).")),
+    ("Relations", ("Un lien relie deux clubs quand un joueur passe de l'un à l'autre ; plus "
+                  "le lien est épais, plus il y a eu de mouvements.")),
+    ("Mouvements", (f"{len(mvts)} mouvements : carrières Wikipédia (passages successifs d'un "
+                   "joueur) et transferts déclarés à API-Football.")),
+    ("Centralité", ("Le PageRank mesure l'importance d'un club : il est élevé quand le club "
+                   "échange des joueurs avec des clubs eux-mêmes importants.")),
+    ("Communautés", ("L'algorithme de Louvain regroupe les clubs qui s'échangent surtout des "
+                    "joueurs entre eux.")),
+]
+for col, (titre, texte) in zip(st.columns(5), blocs, strict=True):
+    col.markdown(f"<div class='carte-axe'><div class='nom'>{titre}</div>"
+                 f"<div class='txt'>{texte}</div></div>", unsafe_allow_html=True)
+
+st.write("")
+st.info(f"Résultat calculé : **{premier['club']}** est le club le plus central du réseau "
+        f"(PageRank {premier['pagerank']:.3f}, contre {second['pagerank']:.3f} pour "
+        f"{second['club']}, deuxième).")
+
+section("Graphe", "Le réseau des mouvements de joueurs",
+        "Taille d'un point = PageRank. Survoler un club pour voir ses arrivées et départs.")
 poids_min = st.slider("Afficher les liens d'au moins … mouvements", 1, 5, 1)
 visibles = noeuds.dropna(subset=["x"]).set_index("club")
 liens = aretes[aretes["depart"].isin(visibles.index) & aretes["arrivee"].isin(visibles.index)
@@ -60,7 +77,7 @@ st.caption("Affichage : clubs de Ligue 1 + les 25 clubs étrangers les plus cent
 
 gauche, droite = st.columns(2)
 with gauche:
-    st.subheader("Clubs les plus centraux (PageRank)")
+    section("Centralité", "Clubs les plus centraux (PageRank)")
     top = noeuds.head(15).copy()
     top["Type"] = top["ligue1"].map({True: "Ligue 1 CI", False: "Étranger"})
     fig = px.bar(top.iloc[::-1], x="pagerank", y="club", orientation="h", color="Type",
@@ -70,14 +87,14 @@ with gauche:
                       legend={"orientation": "h", "y": 1.08})
     st.plotly_chart(fig, width="stretch")
 with droite:
-    st.subheader("Principales destinations à l'étranger")
+    section("Destinations", "Principales destinations hors Ligue 1")
     sortants = mvts[mvts["depart_ligue1"].astype(bool) & ~mvts["arrivee_ligue1"].astype(bool)]
     dest = sortants.groupby("arrivee").size().sort_values(ascending=False).head(15)
     st.dataframe(dest.rename("joueurs venus de Ligue 1 CI").reset_index()
                  .rename(columns={"arrivee": "club"}), hide_index=True,
                  width="stretch", height=480)
 
-st.subheader("Communautés de clubs (algorithme de Louvain)")
+section("Communautés", "Communautés de clubs (algorithme de Louvain)")
 st.caption("Groupes de clubs qui s'échangent surtout des joueurs entre eux.")
 comm = noeuds[noeuds["ligue1"]].groupby("communaute")["club"].apply(list)
 for i, clubs in comm.items():

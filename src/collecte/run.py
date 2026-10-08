@@ -4,6 +4,7 @@
     python -m src.collecte.run --saison 2024-2025    # une seule saison
     python -m src.collecte.run --sans-personnes      # saisons seulement (rapide)
     python -m src.collecte.run --sans-api            # sans API-Football (quota 100/jour)
+    python -m src.collecte.run --villes              # coordonnées des villes seulement
 """
 import argparse
 import hashlib
@@ -15,9 +16,16 @@ from src.collecte.parsers import futbol24 as parser_futbol24
 from src.collecte.parsers import rsssf as parser_rsssf
 from src.collecte.parsers import wikipedia as parser_wiki
 from src.collecte.parsers.wikipedia_personnes import parse_personne
-from src.collecte.scrapers import api_football, futbol24, rsssf, wikipedia, wikipedia_personnes
+from src.collecte.scrapers import (
+    api_football,
+    futbol24,
+    rsssf,
+    wikipedia,
+    wikipedia_personnes,
+    wikipedia_villes,
+)
 from src.collecte.scrapers.http import PageAbsente, telecharger_page
-from src.stockage.mongo_client import creer_index, lire_page, sauver
+from src.stockage.mongo_client import creer_index, get_db, lire_page, sauver
 from src.utils.logs import get_logger
 
 log = get_logger("collecte")
@@ -121,6 +129,36 @@ def collecter_personnes() -> dict:
     return bilan
 
 
+def villes_des_clubs() -> list[str]:
+    """Villes des clubs de Ligue 1 (référentiel PostgreSQL, sinon colonne Wikipédia)."""
+    try:
+        from src.stockage.postgres_client import lire
+
+        return sorted(lire("SELECT DISTINCT v.nom FROM ligue1.club c JOIN ligue1.ville v "
+                           "USING (id_ville) WHERE c.est_ligue1")["nom"])
+    except Exception:  # noqa: BLE001 — base pas encore créée : première collecte
+        return sorted(v for v in get_db().raw_clubs.distinct("ville") if v)
+
+
+def collecter_villes() -> dict:
+    """Coordonnées des villes manquantes (une ville déjà trouvée n'est pas re-téléchargée)."""
+    deja = {d["ville"] for d in get_db().raw_villes.find({"statut": "ok"}, {"ville": 1})}
+    bilan = {"trouvees": 0, "introuvables": [], "deja_connues": 0}
+    for ville in villes_des_clubs():
+        if ville in deja:
+            bilan["deja_connues"] += 1
+            continue
+        doc, pages = wikipedia_villes.chercher_ville(ville)
+        for url, html in pages:
+            archiver_page(url, html, None, wikipedia_villes.SOURCE)
+        sauver("raw_villes", [doc])
+        if doc["statut"] == "ok":
+            bilan["trouvees"] += 1
+        else:
+            bilan["introuvables"].append(ville)
+    return bilan
+
+
 def collecter(saisons: list[str], personnes: bool = True, api: bool = True) -> int:
     """Collecte chaque saison sur chaque source ; renvoie le nombre d'erreurs."""
     debut, erreurs = time.monotonic(), 0
@@ -138,6 +176,11 @@ def collecter(saisons: list[str], personnes: bool = True, api: bool = True) -> i
             except Exception as exc:  # noqa: BLE001 — une page en échec ne bloque pas les autres
                 erreurs += 1
                 log.error("%s | %s | ÉCHEC : %r", saison, source, exc)
+    try:
+        log.info("villes | %s", collecter_villes())
+    except Exception as exc:  # noqa: BLE001
+        erreurs += 1
+        log.error("villes | ÉCHEC : %r", exc)
     if personnes:
         try:
             bilan = collecter_personnes()
@@ -163,7 +206,13 @@ def main():
     parser.add_argument("--sans-personnes", action="store_true",
                         help="ne pas collecter les fiches joueurs/entraîneurs")
     parser.add_argument("--sans-api", action="store_true", help="ne pas appeler API-Football")
+    parser.add_argument("--villes", action="store_true",
+                        help="seulement les coordonnées des villes (carte)")
     args = parser.parse_args()
+    if args.villes:
+        creer_index()
+        log.info("villes | %s", collecter_villes())
+        return
     erreurs = collecter([args.saison] if args.saison else SAISONS,
                         not args.sans_personnes, not args.sans_api)
     raise SystemExit(1 if erreurs else 0)  # code d'erreur pour l'alerte GitHub Actions

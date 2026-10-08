@@ -46,6 +46,9 @@ base = getSampleStyleSheet()
 S = {
     "titre": ParagraphStyle("titre", parent=base["Title"], fontSize=22, leading=27,
                             textColor=ENCRE, spaceAfter=4),
+    "identite": ParagraphStyle("identite", parent=base["Normal"], fontSize=10,
+                               fontName="Helvetica-Bold", textColor=ENCRE,
+                               alignment=TA_CENTER, spaceAfter=10),
     "sous": ParagraphStyle("sous", parent=base["Normal"], fontSize=11, textColor=ENCRE_2,
                            alignment=TA_CENTER, spaceAfter=14),
     "h1": ParagraphStyle("h1", parent=base["Heading1"], fontSize=15, textColor=ORANGE,
@@ -108,8 +111,8 @@ def pied(canvas, doc):
     canvas.saveState()
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(ENCRE_2)
-    canvas.drawString(1.8 * cm, 1.1 * cm, "Plateforme d'analyse de la Ligue 1 ivoirienne — "
-                      "Aboubakar Coulibaly · BUT3 Science des données")
+    canvas.drawString(1.8 * cm, 1.1 * cm, "Ligue 1 Côte d'Ivoire — Data Science & Machine "
+                      "Learning · COULIBALY ABOUBAKAR, Data Scientist")
     canvas.drawRightString(A4[0] - 1.8 * cm, 1.1 * cm, f"{doc.page}")
     canvas.restoreState()
 
@@ -166,8 +169,9 @@ def construire():
 
     h = []
     # ------------------------------------------------------------------ page 1
-    h += [Spacer(1, 0.6 * cm),
-          Paragraph("Prédire la Ligue 1 ivoirienne", S["titre"]),
+    h += [Paragraph("COULIBALY ABOUBAKAR · <font color='#E07000'>Data Scientist</font>",
+                    S["identite"]),
+          Paragraph("Prédire la Ligue 1 Côte d'Ivoire", S["titre"]),
           Paragraph("De la collecte web au réseau de neurones : une plateforme de données "
                     "complète sur dix saisons de MTN Ligue 1 (2016 → 2026)", S["sous"]),
           chiffres_cles([(f"{(joues.groupby('saison').size() >= 90).sum()}",
@@ -234,7 +238,7 @@ def construire():
             "et une empreinte SHA-256 ; on peut re-parser sans re-télécharger. Collecte "
             "quotidienne planifiée, pause de 2 s entre requêtes, quota API respecté (100/jour) "
             "avec reprise automatique."),
-          p("<b>ETL et contrôles.</b> L'ETL harmonise 157 écritures de noms en 31 clubs, "
+          p("<b>ETL et contrôles.</b> L'ETL ramène 102 variantes de noms à 31 clubs, "
             "recoupe les scores entre sources (11 divergences sur ~2 000 matchs, toutes "
             "journalisées) et vérifie que les classements recalculés sont identiques aux "
             "classements officiels sur les 10 saisons. Le modèle relationnel (MCD → MLD → "
@@ -387,8 +391,9 @@ def construire():
 
     # ------------------------------------------- 5. déploiement, limites
     h += [Paragraph("5. Restitution et déploiement", S["h1"]),
-          p("Le tableau de bord Streamlit (6 pages : Accueil, Championnat, Club, Réseau, "
-            "Prédiction, Modèles) lit uniquement des fichiers Parquet exportés depuis "
+          p("Le tableau de bord Streamlit (7 pages : Accueil avec la carte des clubs, "
+            "Championnat, Clubs, Réseau, Prédiction, Modèles, Données & Méthodologie) lit "
+            "uniquement des fichiers Parquet exportés depuis "
             "PostgreSQL et les résultats du modèle : il se déploie sur Streamlit Community "
             "Cloud sans exposer les bases. La page Prédiction donne les probabilités des "
             "matchs à venir de 2026-27 et un simulateur pour toutes les affiches."),
@@ -435,8 +440,8 @@ def construire():
 
     doc = SimpleDocTemplate(str(SORTIE), pagesize=A4, leftMargin=1.8 * cm,
                             rightMargin=1.8 * cm, topMargin=1.5 * cm, bottomMargin=1.6 * cm,
-                            title="Prédire la Ligue 1 ivoirienne",
-                            author="Aboubakar Coulibaly")
+                            title="Prédire la Ligue 1 Côte d'Ivoire",
+                            author="COULIBALY ABOUBAKAR, Data Scientist")
     doc.build(h, onFirstPage=pied, onLaterPages=pied)
     print(SORTIE)
 

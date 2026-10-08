@@ -329,7 +329,7 @@ def architecture() -> None:
     for x in (2.2, 4.6, 7.0, 9.4):
         ax.annotate("", xy=(x + 0.3, 1.6), xytext=(x, 1.6),
                     arrowprops={"arrowstyle": "-|>", "color": ENCRE_2, "linewidth": 1.5})
-    ax.text(6, 0.15, "networkx / Neo4j : graphe des carrières et transferts (PageRank, "
+    ax.text(6, 0.15, "networkx : graphe des carrières et transferts (PageRank, "
             "communautés)", ha="center", fontsize=9, color=ENCRE_2, style="italic")
     _sauver(fig, "00_architecture")
 

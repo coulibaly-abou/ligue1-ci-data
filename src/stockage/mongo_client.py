@@ -48,6 +48,7 @@ CLES = {
     "raw_scorers": ["saison", "joueur", "source"],
     "raw_persons": ["url"],
     "raw_api": ["cle"],  # réponses API-Football brutes (endpoint + paramètres)
+    "raw_villes": ["ville"],  # coordonnées des villes (articles Wikipédia)
 }
 INDEX_SIMPLES = {
     "raw_pages": ["saison", "source"],
