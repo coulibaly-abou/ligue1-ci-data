@@ -1,0 +1,74 @@
+{
+  "collections": {
+    "raw_api": {
+      "documents": 145,
+      "sources": {
+        "api_football": 145
+      }
+    },
+    "raw_clubs": {
+      "documents": 143,
+      "sources": {
+        "wikipedia": 102,
+        "wikipedia_en": 41
+      }
+    },
+    "raw_fixtures": {
+      "documents": 334,
+      "sources": {
+        "futbol24": 56,
+        "wikipedia": 278
+      }
+    },
+    "raw_matches": {
+      "documents": 2873,
+      "sources": {
+        "futbol24": 13,
+        "rsssf": 1930,
+        "wikipedia": 930
+      }
+    },
+    "raw_pages": {
+      "documents": 711,
+      "sources": {}
+    },
+    "raw_persons": {
+      "documents": 627,
+      "sources": {
+        "wikipedia_en": 412,
+        "wikipedia_fr": 215
+      }
+    },
+    "raw_scorers": {
+      "documents": 52,
+      "sources": {
+        "wikipedia": 36,
+        "wikipedia_en": 16
+      }
+    },
+    "raw_standings": {
+      "documents": 469,
+      "sources": {
+        "rsssf": 301,
+        "wikipedia": 168
+      }
+    },
+    "raw_villes": {
+      "documents": 17,
+      "sources": {
+        "wikipedia_fr": 17
+      }
+    }
+  },
+  "derniere_collecte": "2026-10-08T00:40:58.737000",
+  "villes_geolocalisees": 17,
+  "anomalies_etl": {
+    "coordonnées absentes": 1,
+    "score différent RSSSF / API-Football": 6,
+    "score différent RSSSF / Wikipédia": 5
+  },
+  "alias_clubs": {
+    "clubs": 31,
+    "variantes": 102
+  }
+}

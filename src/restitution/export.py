@@ -9,8 +9,9 @@ import json
 import shutil
 
 import pandas as pd
+import yaml
 
-from config.settings import RACINE
+from config.settings import FICHIER_ALIAS, RACINE
 from src.graphe import analyses as graphe
 from src.stockage.postgres_client import lire
 from src.utils.logs import get_logger
@@ -18,16 +19,6 @@ from src.utils.logs import get_logger
 log = get_logger("export")
 DOSSIER = RACINE / "app" / "data"
 RESULTATS = RACINE / "docs" / "resultats"
-
-# Coordonnées approximatives des villes des clubs (centre-ville), pour la carte
-COORDONNEES = {
-    "Abidjan": (5.345, -4.024), "Abobo": (5.416, -4.016), "Yamoussoukro": (6.827, -5.289),
-    "Bouaké": (7.690, -5.030), "Korhogo": (9.458, -5.629), "San-Pédro": (4.748, -6.636),
-    "Gagnoa": (6.131, -5.951), "Abengourou": (6.730, -3.496), "Odienné": (9.510, -7.564),
-    "Agboville": (5.928, -4.213), "Adiaké": (5.286, -3.304), "Ferkessédougou": (9.593, -5.194),
-    "Akoupé": (6.384, -3.888), "Touba": (8.283, -7.683), "Tanda": (7.803, -3.168),
-    "Grand-Bassam": (5.211, -3.739), "Issia": (6.492, -6.586),
-}
 
 REQUETES = {
     "matchs": """
@@ -55,7 +46,8 @@ REQUETES = {
         JOIN ligue1.club k USING (id_club)""",
     "saisons": "SELECT * FROM ligue1.saison ORDER BY id_saison",
     "clubs": """
-        SELECT k.nom AS club, v.nom AS ville, st.nom AS stade, st.capacite
+        SELECT k.nom AS club, v.nom AS ville, v.latitude::float AS lat,
+               v.longitude::float AS lon, v.url_coordonnees, st.nom AS stade, st.capacite
         FROM ligue1.club k
         LEFT JOIN ligue1.ville v USING (id_ville)
         LEFT JOIN ligue1.stade st ON st.id_stade = k.id_stade
@@ -83,10 +75,6 @@ def exporter_bases() -> None:
         _sauver(lire(sql), nom)
     for nom, fichier in FICHIERS_SQL.items():
         _sauver(lire((RACINE / "sql" / "analyses" / fichier).read_text(encoding="utf-8")), nom)
-    clubs = pd.read_parquet(DOSSIER / "clubs.parquet")
-    clubs["lat"] = clubs["ville"].map(lambda v: COORDONNEES.get(v, (None, None))[0])
-    clubs["lon"] = clubs["ville"].map(lambda v: COORDONNEES.get(v, (None, None))[1])
-    _sauver(clubs, "clubs")
 
 
 def exporter_reseau() -> None:
@@ -122,8 +110,35 @@ def exporter_modele() -> None:
              ["modele_retenu"])
 
 
+def exporter_sources() -> None:
+    """Volumes réels de la zone brute MongoDB, par collection et par source."""
+    from src.stockage.mongo_client import get_db
+
+    db = get_db()
+    volumes = {}
+    for nom in sorted(db.list_collection_names()):
+        sources = {} if nom == "raw_pages" else {
+            s: db[nom].count_documents({"source": s}) for s in db[nom].distinct("source")}
+        volumes[nom] = {"documents": db[nom].estimated_document_count(), "sources": sources}
+    derniere = db.raw_pages.find_one(sort=[("telecharge_le", -1)], projection={"telecharge_le": 1})
+    infos = {"collections": volumes,
+             "derniere_collecte": derniere["telecharge_le"].isoformat() if derniere else None,
+             "villes_geolocalisees": db.raw_villes.count_documents({"statut": "ok"})}
+    anomalies = RACINE / "logs" / "anomalies_etl.csv"
+    if anomalies.exists():
+        infos["anomalies_etl"] = (pd.read_csv(anomalies, encoding="utf-8-sig")
+                                  .groupby("description").size().to_dict())
+    alias = yaml.safe_load(FICHIER_ALIAS.read_text(encoding="utf-8"))
+    infos["alias_clubs"] = {"clubs": len(alias),
+                            "variantes": sum(len(v or []) for v in alias.values())}
+    (DOSSIER / "sources.json").write_text(json.dumps(infos, indent=2, ensure_ascii=False),
+                                          encoding="utf-8")
+    log.info("sources.json : %d collections", len(volumes))
+
+
 def main() -> None:
     DOSSIER.mkdir(parents=True, exist_ok=True)
+    exporter_sources()
     exporter_bases()
     exporter_reseau()
     exporter_modele()

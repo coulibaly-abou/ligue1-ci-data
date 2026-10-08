@@ -9,23 +9,23 @@ from commun import (
     VERT,
     charger_modele,
     configurer,
+    entete,
     metriques,
     pied_de_page,
+    section,
 )
 
 configurer()
-st.title("Comparaison des modèles de prédiction")
-st.markdown(
-    "<p style='color:#57606A;font-size:1.05rem'>"
-    "Pour juger la fiabilité des prédictions : comment elles sont produites, et "
-    "avec quelle marge d'erreur."
-    "</p>", unsafe_allow_html=True)
+entete("Comparaison des modèles",
+       "Six modèles évalués avec le même protocole temporel : comment les prédictions "
+       "sont produites, et avec quelle marge d'erreur.")
 
 m = metriques()
 if m is None:
     st.warning("Résultats absents : lancer `make train` puis `make export`.")
     st.stop()
 proto = m["protocole"]
+section("Méthodologie", "Protocole de validation")
 st.markdown(f"""
 **Cible** : résultat du match en 3 classes — victoire domicile (D), nul (N), victoire
 extérieur (E). **{proto['n_variables']} variables** calculées uniquement avec l'information
@@ -42,19 +42,36 @@ retenu : **le plus simple** parmi ceux à moins de 0,002 de log-loss du meilleur
 
 glis = charger_modele("validation_glissante")
 glis["Modèle"] = glis["modele"].map(NOMS_MODELES)
-moy = glis.groupby("Modèle")[["accuracy", "log_loss", "rps"]].mean().sort_values("log_loss")
+moy = glis.groupby("Modèle")[["accuracy", "log_loss", "brier", "rps"]].mean()     .sort_values("log_loss")
 test = {r["modele"]: r for r in m["resultats_test"]}
 naif_glis = moy.loc[NOMS_MODELES["naif"]]
 
-st.subheader("Résultats moyens de la validation glissante (5 saisons)")
+section("Résultats", "Validation glissante : moyennes sur 5 saisons",
+        f"{proto['n_glissante']} matchs prédits, chaque saison avec les seules saisons "
+        "précédentes. Plus la log-loss, le Brier et le RPS sont bas, meilleures sont les "
+        "probabilités.")
+retenu = NOMS_MODELES[m["modele_retenu"]]
+meilleur = moy.drop(NOMS_MODELES["naif"]).index[0]
 c = st.columns(3)
-meilleur = moy.index[0]
-c[0].metric("Meilleur modèle", meilleur)
-c[1].metric("Précision", f"{moy.iloc[0]['accuracy']:.1%}",
-            f"{moy.iloc[0]['accuracy'] - naif_glis['accuracy']:+.1%} vs naïf")
-c[2].metric("Log-loss", f"{moy.iloc[0]['log_loss']:.4f}",
-            f"{moy.iloc[0]['log_loss'] - naif_glis['log_loss']:+.4f} vs naïf",
+c[0].metric("Modèle retenu", retenu,
+            "le plus simple à performance équivalente", delta_color="off")
+c[1].metric("Précision", f"{moy.loc[retenu, 'accuracy']:.1%}",
+            f"{moy.loc[retenu, 'accuracy'] - naif_glis['accuracy']:+.1%} vs naïf")
+c[2].metric("Log-loss", f"{moy.loc[retenu, 'log_loss']:.4f}",
+            f"{moy.loc[retenu, 'log_loss'] - naif_glis['log_loss']:+.4f} vs naïf",
             delta_color="inverse")
+tableau_glis = moy.reset_index()
+tableau_glis.columns = ["Modèle", "Précision", "Log-loss", "Brier", "RPS"]
+st.dataframe(tableau_glis.style.format({"Précision": "{:.1%}", "Log-loss": "{:.4f}",
+                                        "Brier": "{:.4f}", "RPS": "{:.4f}"})
+             .highlight_min(subset=["Log-loss", "Brier", "RPS"], color="#FFE0B8")
+             .highlight_max(subset=["Précision"], color="#FFE0B8"),
+             hide_index=True, width="stretch")
+mlp = NOMS_MODELES["mlp"]
+rang_mlp = list(moy.index).index(mlp) + 1
+st.caption(f"Classement par log-loss moyenne : {meilleur} en tête ; le {mlp.lower()} arrive "
+           f"{rang_mlp}e sur {len(moy)}. Il fait mieux que la référence naïve, mais pas mieux "
+           "que les modèles simples avec ≈ 1 500 matchs d'entraînement.")
 
 gauche, droite = st.columns(2)
 with gauche:
@@ -68,13 +85,19 @@ with gauche:
                       margin={"l": 0, "r": 0, "t": 10, "b": 0})
     st.plotly_chart(fig, width="stretch")
 with droite:
-    fig = px.line(glis, x="saison_test", y="log_loss", color="Modèle", markers=True)
+    couleurs_modeles = {"naif": GRIS, "elo": ORANGE, "logreg": "#2A78D6", "foret": VERT,
+                        "boosting": "#7A4FB0", "mlp": "#B8322A"}
+    fig = px.line(glis, x="saison_test", y="log_loss", color="Modèle", markers=True,
+                  line_dash="Modèle",
+                  line_dash_map={NOMS_MODELES[k]: "dash" if k == "naif" else "solid"
+                                 for k in couleurs_modeles},
+                  color_discrete_map={NOMS_MODELES[k]: c for k, c in couleurs_modeles.items()})
     fig.update_layout(height=340, xaxis={"title": "Saison prédite", "dtick": 1},
                       yaxis_title="Log-loss", margin={"l": 0, "r": 0, "t": 10, "b": 0},
                       legend={"font": {"size": 10}})
     st.plotly_chart(fig, width="stretch")
 
-st.subheader("Test final — saison 2025-2026")
+section("Test final", "Saison 2025-2026, jamais utilisée pour un choix")
 tab = pd.DataFrame(m["resultats_test"])
 tab = tab[["libelle", "accuracy", "log_loss", "brier", "rps"]].sort_values("log_loss")
 tab.columns = ["Modèle", "Précision", "Log-loss", "Brier", "RPS"]
@@ -95,7 +118,7 @@ for nom, b in boot.items():
                        "écart": b[cadre]["ecart_moyen"], "bas": b[cadre]["ic95"][0],
                        "haut": b[cadre]["ic95"][1]})
 bt = pd.DataFrame(lignes)
-st.subheader("Le gain sur la référence naïve est-il réel ?")
+section("Significativité", "Le gain sur la référence naïve est-il réel ?")
 st.caption("Écart de log-loss avec la référence naïve et intervalle de confiance à 95 % "
            "(bootstrap). En dessous de 0 = mieux que le naïf ; si l'intervalle ne touche pas "
            "0, le gain est significatif.")
@@ -116,7 +139,7 @@ st.plotly_chart(fig, width="stretch")
 
 gauche, droite = st.columns(2)
 with gauche:
-    st.subheader("Matrice de confusion (test)")
+    section("Erreurs", "Matrice de confusion (test)")
     choix = st.selectbox("Modèle", list(m["confusions"]), format_func=NOMS_MODELES.get,
                          index=list(m["confusions"]).index(m["modele_retenu"]))
     cm = pd.DataFrame(m["confusions"][choix])
@@ -131,7 +154,7 @@ with gauche:
                f"fois sur {int(cm.to_numpy().sum())}, dont {bons_n} justes — le nul est la "
                "classe la plus difficile.")
 with droite:
-    st.subheader("Calibration des probabilités")
+    section("Calibration", "Les probabilités sont-elles fiables ?")
     cal = charger_modele("calibration")
     choix_cal = st.selectbox("Modèle ", sorted(cal["modele"].unique()),
                              format_func=NOMS_MODELES.get,
@@ -145,7 +168,7 @@ with droite:
                       yaxis_title="Fréquence observée", margin={"l": 0, "r": 0, "t": 10, "b": 0})
     st.plotly_chart(fig, width="stretch")
 
-st.subheader("Quelles variables comptent ?")
+section("Interprétation", "Quelles variables comptent ?")
 imp = charger_modele("importance_variables")
 choix_imp = st.radio("Modèle", ["logreg", "foret", "mlp"], format_func=NOMS_MODELES.get,
                      horizontal=True)
