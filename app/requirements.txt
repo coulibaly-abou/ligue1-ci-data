@@ -1,0 +1,6 @@
+# Dépendances du tableau de bord seul (Streamlit Community Cloud) :
+# l'application lit app/data/*.parquet, sans base de données ni PyTorch.
+streamlit>=1.40
+pandas>=2.0
+pyarrow>=15
+plotly>=5.24
