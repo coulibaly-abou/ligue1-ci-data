@@ -10,8 +10,8 @@ from commun import (
     pied_de_page,
 )
 
-configurer("Prédiction", "🔮")
-st.title("🔮 Prédiction des matchs 2026-2027")
+configurer()
+st.title("Prédiction des matchs 2026-2027")
 
 m = metriques()
 prochains = charger_modele("predictions_a_venir")
@@ -102,7 +102,7 @@ if elo is not None:
     st.dataframe(actuels.style.format({"elo": "{:.0f}"}).bar(subset=["elo"], color="#E07000"),
                  width="stretch")
 
-st.info("⚠️ Le football ivoirien est très serré (≈ 30 % de nuls, ≈ 2 buts par match) : "
+st.info("Le football ivoirien est très serré (≈ 30 % de nuls, ≈ 2 buts par match) : "
         "même le meilleur modèle se trompe plus d'une fois sur deux. Les probabilités "
         "sont utiles pour comparer des affiches, pas pour parier.")
 pied_de_page()

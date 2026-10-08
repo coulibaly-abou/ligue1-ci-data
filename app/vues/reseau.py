@@ -3,8 +3,8 @@ import plotly.graph_objects as go
 import streamlit as st
 from commun import ORANGE, VERT, charger, configurer, pied_de_page
 
-configurer("Réseau", "🕸️")
-st.title("🕸️ Réseau des clubs : où vont les joueurs ?")
+configurer()
+st.title("Réseau des clubs : où vont les joueurs ?")
 st.markdown(
     "Deux clubs sont reliés quand un joueur passe de l'un à l'autre : **carrières "
     "Wikipédia** (≈ 460 joueurs et entraîneurs) et **transferts API-Football** (2022 → 2026). "

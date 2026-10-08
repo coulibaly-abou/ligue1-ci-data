@@ -36,9 +36,8 @@ def metriques() -> dict | None:
     return json.loads(chemin.read_text(encoding="utf-8")) if chemin.exists() else None
 
 
-def configurer(titre: str, icone: str = "⚽") -> None:
-    st.set_page_config(page_title=f"{titre} · Ligue 1 ivoirienne", page_icon=icone,
-                       layout="wide")
+def configurer() -> None:
+    """Styles communs (la configuration de la page est faite une fois dans Accueil.py)."""
     st.markdown("""<style>
         .block-container {padding-top: 2rem;}
         div[data-testid="stMetricValue"] {font-size: 1.8rem;}
