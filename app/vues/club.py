@@ -13,8 +13,8 @@ from commun import (
     serie_html,
 )
 
-configurer("Club", "🛡️")
-st.title("🛡️ Fiche club")
+configurer()
+st.title("Fiche club")
 
 resultats = charger("resultats_club")
 classement = charger("classement_journee")
@@ -31,7 +31,7 @@ r = resultats[resultats["club"] == club].sort_values("date_match")
 
 info = clubs_info.loc[club] if club in clubs_info.index else None
 if info is not None:
-    st.caption(f"📍 {info['ville'] or '—'} · 🏟️ {info['stade'] or '—'}")
+    st.caption(f"Ville : {info['ville'] or '—'} · Stade : {info['stade'] or '—'}")
 
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Saisons en Ligue 1", r["saison"].nunique())
@@ -53,6 +53,8 @@ with gauche:
     st.subheader("Rang final par saison")
     rangs = []
     for s in sorted(r["saison"].unique()):
+        if s == saison_actuelle:  # saison qui débute : rang pas encore significatif
+            continue
         f = classement_final(classement, s)
         ligne = f[f["club"] == club]
         if len(ligne):
@@ -65,6 +67,7 @@ with gauche:
         fig.update_yaxes(autorange="reversed", dtick=2, title="Rang")
         fig.update_layout(height=360, margin={"l": 0, "r": 0, "t": 10, "b": 0}, xaxis_title=None)
         st.plotly_chart(fig, width="stretch")
+        st.caption("Saison en cours exclue.")
 with droite:
     st.subheader("Domicile vs extérieur")
     lieux = r.assign(Lieu=r["a_domicile"].map({True: "Domicile", False: "Extérieur"}))
@@ -74,8 +77,8 @@ with droite:
     for issue, couleur, nom in (("V", VERT, "Victoire"), ("N", GRIS, "Nul"),
                                 ("D", ROUGE, "Défaite")):
         fig.add_bar(y=rep.index, x=rep[issue], name=nom, orientation="h",
-                    marker_color=couleur, text=(rep[issue] * 100).round().astype(int)
-                    .astype(str) + " %")
+                    marker_color=couleur, textfont={"color": "white"},
+                    text=(rep[issue] * 100).round().astype(int).astype(str) + " %")
     fig.update_layout(barmode="stack", height=360, xaxis_tickformat=".0%",
                       margin={"l": 0, "r": 0, "t": 10, "b": 0}, legend={"orientation": "h", "y": 1.1})
     st.plotly_chart(fig, width="stretch")

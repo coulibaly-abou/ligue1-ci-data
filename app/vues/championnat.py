@@ -12,8 +12,8 @@ from commun import (
     pied_de_page,
 )
 
-configurer("Championnat", "🏆")
-st.title("🏆 Championnat")
+configurer()
+st.title("Championnat")
 
 classement = charger("classement_journee")
 resultats_saison = charger("resultats_saison")

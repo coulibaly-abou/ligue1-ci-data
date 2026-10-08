@@ -13,8 +13,8 @@ from commun import (
     pied_de_page,
 )
 
-configurer("Modèles", "🧠")
-st.title("🧠 Comparaison des modèles de prédiction")
+configurer()
+st.title("Comparaison des modèles de prédiction")
 
 m = metriques()
 if m is None:
