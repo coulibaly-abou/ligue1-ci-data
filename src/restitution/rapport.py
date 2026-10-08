@@ -242,7 +242,7 @@ def construire():
             "recoupe les scores entre sources (11 divergences sur ~2 000 matchs, toutes "
             "journalisées) et vérifie que les classements recalculés sont identiques aux "
             "classements officiels sur les 10 saisons. Le modèle relationnel (MCD → MLD → "
-            "MPD) compte 13 tables ; 4 vues matérialisées et 10 requêtes SQL documentées "
+            "MPD) compte 12 tables et une vue ; 4 vues matérialisées et 10 requêtes SQL documentées "
             "(fonctions de fenêtre, CTE « gaps and islands ») alimentent le tableau de bord."),
           tableau([["Saison", "Matchs", "Domicile", "Nul", "Extérieur", "Buts/match"]] +
                   [[r.saison, r.matchs, f"{r.pct_domicile:.1f} %", f"{r.pct_nul:.1f} %",

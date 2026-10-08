@@ -1,10 +1,10 @@
-"""Vidéo LinkedIn (≈ 75 s, 1920x1080) : présentation du projet et du site en fonctionnement.
+"""Vidéo LinkedIn (≈ 85 s, 1920x1080) : présentation du projet et du site en fonctionnement.
 
     streamlit run app/Accueil.py --server.port 8599     # dans un autre terminal
     python -m src.restitution.video                    # ou : make video
 
-Sept scènes : identité, carte des clubs (apparition progressive), objectifs, analyses,
-Machine Learning, prédiction, conclusion. Les écrans du site sont capturés en direct
+Huit scènes : identité, carte des clubs (apparition progressive), objectifs, collecte et
+bases de données, analyses, Machine Learning, prédiction, conclusion. Les écrans du site sont capturés en direct
 (Microsoft Edge sans interface) ; tous les chiffres affichés sont lus dans les résultats
 du projet (app/data/). Sortie : docs/linkedin/video_ligue1.mp4, une image clé par scène
 dans docs/linkedin/diapos/ et les captures dans docs/linkedin/captures_hd/.
@@ -135,7 +135,8 @@ def capturer(page: str, sortie: Path, largeur=1600, hauteur=4400, echelle=1.5):
 def captures_site(reutiliser: bool = False) -> dict[str, Image.Image]:
     CAPTURES.mkdir(parents=True, exist_ok=True)
     pages = {"accueil": "", "championnat": "championnat", "club": "club",
-             "prediction": "prediction", "modeles": "modeles"}
+             "prediction": "prediction", "modeles": "modeles",
+             "methodologie": "methodologie"}
     for nom, page in pages.items():
         if not (reutiliser and (CAPTURES / f"{nom}.png").exists()):
             capturer(page, CAPTURES / f"{nom}.png")
@@ -230,6 +231,83 @@ def scene_objectifs(t, duree):
             d = ImageDraw.Draw(img)
             d.rounded_rectangle([200, y + 8, 216, y + 24], radius=4, fill=ORANGE)
         texte(img, (250, y), o, 46, ENCRE, gras=False, alpha=b, decalage=int(18 * (1 - b)))
+    return img
+
+
+def chiffres_pipeline() -> list[tuple[str, str, list[str]]]:
+    """Étapes de la chaîne de données, avec les volumes réels du projet."""
+    sources = json.loads((DATA / "sources.json").read_text(encoding="utf-8"))
+    c = sources["collections"]
+    schema = (RACINE / "sql" / "schema.sql").read_text(encoding="utf-8")
+    n_tables = sum(ligne.startswith("CREATE TABLE") for ligne in schema.splitlines())
+    n_requetes = len(list((RACINE / "sql" / "analyses").glob("*.sql")))
+    joues = (pd.read_parquet(DATA / "matchs.parquet")["statut"] == "joue").sum()
+    ecarts = sum(n for d, n in sources.get("anomalies_etl", {}).items()
+                 if d.startswith("score"))
+    alias = sources.get("alias_clubs", {})
+    return [
+        ("Sources web", "4 sources", ["RSSSF · Wikipédia", "Futbol24 · API-Football"]),
+        ("Collecte Python", f"{c['raw_pages']['documents']} pages",
+         ["archivées (URL, date)", "robots.txt respecté"]),
+        ("MongoDB", f"{c['raw_matches']['documents']:_} matchs".replace("_", " "),
+         ["bruts, toutes sources", f"{c['raw_persons']['documents']} fiches joueurs"]),
+        ("ETL", f"{ecarts} écarts", ["de score signalés",
+                                     (f"{alias.get('variantes', '?')} noms → "
+                                     f"{alias.get('clubs', '?')} clubs")]),
+        ("PostgreSQL", f"{joues:_} matchs".replace("_", " "),
+         [f"{n_tables} tables", f"{n_requetes} requêtes SQL"]),
+    ]
+
+
+def scene_collecte(t, duree, capture, y_css, etapes):
+    """Chaîne de collecte animée, puis la page Données & Méthodologie du site."""
+    if t < 7.5:
+        img = Image.new("RGBA", (L, H), FOND)
+        bandeau_drapeau(img, 0, 8)
+        a = progression(t, 0.1)
+        texte(img, (120, 120), "COLLECTE ET BASES DE DONNÉES", 30, ORANGE, alpha=a)
+        texte(img, (120, 170), "De la page web à la base analytique", 64, ENCRE, alpha=a)
+        largeur, ecart, y0, y1 = 330, 46, 380, 740
+        x = (L - (5 * largeur + 4 * ecart)) // 2
+        for i, (nom, chiffre, details) in enumerate(etapes):
+            b = progression(t, 0.8 + i * 1.0, 0.6)
+            if b > 0:
+                calque = Image.new("RGBA", img.size, (0, 0, 0, 0))
+                d = ImageDraw.Draw(calque)
+                dy = int(25 * (1 - b))
+                fond = (230, 242, 236) if nom in ("MongoDB", "PostgreSQL") else (255, 243, 230)
+                bord = (0, 107, 69) if nom in ("MongoDB", "PostgreSQL") else (224, 112, 0)
+                d.rounded_rectangle([x, y0 + dy, x + largeur, y1 + dy], radius=22,
+                                    fill=(*fond, int(255 * b)), outline=(*bord, int(255 * b)),
+                                    width=4)
+                img.alpha_composite(calque)
+                cx = x + largeur // 2
+                texte(img, (cx, y0 + 60 + dy), nom, 38, ENCRE, alpha=b, ancre="mm")
+                texte(img, (cx, y0 + 165 + dy), chiffre, 42, ORANGE, alpha=b, ancre="mm")
+                for k, ligne in enumerate(details):
+                    texte(img, (cx, y0 + 260 + k * 46 + dy), ligne, 28, ENCRE_2, gras=False,
+                          alpha=b, ancre="mm")
+                if i < len(etapes) - 1:
+                    f = progression(t, 1.3 + i * 1.0, 0.4)
+                    if f > 0:
+                        d2 = ImageDraw.Draw(img)
+                        xa, ya = x + largeur + 10, (y0 + y1) // 2
+                        d2.line([xa, ya, xa + int((ecart - 22) * f), ya], fill=ENCRE_2,
+                                width=5)
+                        if f >= 1:
+                            d2.polygon([(xa + ecart - 22, ya - 11), (xa + ecart - 8, ya),
+                                        (xa + ecart - 22, ya + 11)], fill=ENCRE_2)
+            x += largeur + ecart
+        c = progression(t, 6.0)
+        texte(img, (L // 2, 880), "Collecte quotidienne planifiée · chaque donnée garde sa "
+              "source", 32, ENCRE_2, gras=False, alpha=c, ancre="mm")
+        return img
+    t2, d2 = t - 7.5, duree - 7.5
+    img = plan(capture, y_css, t2 / d2, dy_css=60)
+    vignette(img, "Données & Méthodologie", "volumes réels de la zone brute MongoDB",
+             alpha=progression(t2, 0.2))
+    encadre(img, (440, 315, 1815, 760), "Chaque document garde sa source et sa date",
+            alpha=progression(t2, 1.0), dessous=True)
     return img
 
 
@@ -371,6 +449,9 @@ def main(reutiliser: bool = False, apercu: bool = False) -> None:
         ("02_carte", 11.0, scene_carte, {"cartes": cartes, "ordre": ordre,
                                          "total_clubs": len(clubs)}),
         ("03_objectifs", 8.5, scene_objectifs, {}),
+        ("03b_collecte", 13.0, scene_collecte, {
+            "capture": ecrans["methodologie"], "y_css": 330,
+            "etapes": chiffres_pipeline()}),
         ("04a_championnat", 6.0, scene_plan, {
             "capture": ecrans["championnat"], "y_css": 170,
             "titre": "Analyse du championnat", "sous": "classement recalculé et évolution",

@@ -88,7 +88,7 @@ Journal : `logs/collecte_quotidienne.log` et `logs/pipeline.log`.
 | Base | Rôle |
 |---|---|
 | MongoDB | zone brute : HTML archivé (URL, date, SHA-256) et documents tels que collectés, par source |
-| PostgreSQL | zone analytique : 13 tables normalisées, 102 variantes de noms harmonisées en 31 clubs (config/clubs_alias.yml), scores recoupés entre sources, classements recalculés identiques aux officiels ; 10 requêtes dans [sql/analyses/](sql/analyses/), vues matérialisées dans [sql/vues_materialisees.sql](sql/vues_materialisees.sql) |
+| PostgreSQL | zone analytique : 12 tables normalisées (+ 1 vue), 102 variantes de noms harmonisées en 31 clubs (config/clubs_alias.yml), scores recoupés entre sources, classements recalculés identiques aux officiels ; 10 requêtes dans [sql/analyses/](sql/analyses/), vues matérialisées dans [sql/vues_materialisees.sql](sql/vues_materialisees.sql) |
 | Graphe | carrières Wikipédia + transferts API-Football : PageRank, intermédiarité, communautés de Louvain ([src/graphe/analyses.py](src/graphe/analyses.py)) ; calculé avec networkx pour le tableau de bord. **À faire** : chargement dans Neo4j et 5 requêtes Cypher ([cypher/](cypher/) encore vide) |
 
 ## Modélisation
