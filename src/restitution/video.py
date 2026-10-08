@@ -98,6 +98,26 @@ def diapo_chiffres(titre, chiffres, n, total):
     return img
 
 
+def diapo_publics(titre, publics, n, total):
+    """Quatre cartes : public, bénéfice, constat mesuré."""
+    img, d = _cadre(n, total)
+    _texte_centre(d, 150, titre, 56)
+    largeur = (L - 160) // len(publics)
+    for i, (public, benefice, fait) in enumerate(publics):
+        x0 = 80 + i * largeur + 15
+        x1 = x0 + largeur - 30
+        xc = (x0 + x1) // 2
+        d.rounded_rectangle([x0, 260, x1, 900], radius=24, fill="#FFF3E6")
+        d.multiline_text((xc, 340), public, font=_police(True, 40), fill=ENCRE,
+                         anchor="ma", align="center", spacing=8)
+        d.multiline_text((xc, 480), benefice, font=_police(True, 36), fill=ORANGE,
+                         anchor="ma", align="center", spacing=8)
+        d.line([x0 + 60, 610, x1 - 60, 610], fill="#E6C9A8", width=2)
+        d.multiline_text((xc, 640), fait, font=_police(False, 32), fill=ENCRE_2,
+                         anchor="ma", align="center", spacing=8)
+    return img
+
+
 def construire_diapos() -> list[tuple[Image.Image, float]]:
     json.loads((RACINE / "docs" / "resultats" / "metriques.json")
                    .read_text(encoding="utf-8"))
@@ -110,37 +130,56 @@ def construire_diapos() -> list[tuple[Image.Image, float]]:
     scores = pd.read_parquet(RACINE / "app" / "data" / "scores.parquet")
     part4 = scores.head(4)["pct"].sum()
     saisons = int((joues.groupby("saison").size() >= 90).sum())
+    resultats = pd.read_parquet(RACINE / "app" / "data" / "resultats_club.parquet")
+    par_lieu = resultats.groupby(["club", "a_domicile"])["points"].mean().unstack()
+    par_lieu = par_lieu[resultats.groupby("club").size() >= 120]
+    club_ecart = (par_lieu[True] - par_lieu[False]).idxmin()
+    mvts = pd.read_parquet(RACINE / "app" / "data" / "reseau_mouvements.parquet")
+    departs = mvts[mvts["depart_ligue1"].astype(bool) & ~mvts["arrivee_ligue1"].astype(bool)]
+    part_asec = (departs["depart"] == "ASEC Mimosas").mean()
+    palmares = pd.read_parquet(RACINE / "app" / "data" / "palmares.parquet")
+    titres_asec = int((palmares["champion"] == "ASEC Mimosas").sum())
 
-    T = 12
+    T = 13
     d = [
-        (diapo_message([("J'ai essayé de prédire", 80, ENCRE),
-                        ("la Ligue 1 ivoirienne", 80, ORANGE),
-                        ("avec la data et l'IA", 80, ENCRE),
-                        ("Voici ce que j'ai appris.", 40, ENCRE_2)], 1, T), 4.5),
+        (diapo_message([("La Ligue 1 ivoirienne forme des talents", 70, ENCRE),
+                        ("pour toute l'Afrique et l'Europe…", 70, ENCRE),
+                        ("mais presque personne n'analyse ses données.", 62, ORANGE),
+                        ("J'ai construit la plateforme qui manquait.", 40, ENCRE_2)], 1, T),
+         5.0),
+        (diapo_publics("Pour qui ? Des décisions fondées sur des faits", [
+            ("Clubs et\nentraîneurs", "Mesurer sa\nperformance",
+             f"{club_ecart} :\nmoins de points\nà domicile\nqu'à l'extérieur"),
+            ("Joueurs et\nrecruteurs", "Rendre visibles\nles talents",
+             f"{part_asec:.0%} des départs\nviennent\nde la seule ASEC"),
+            ("Médias et\nsupporters", "Débattre avec\ndes chiffres",
+             "scores recoupés\nentre 3 sources"),
+            ("Ligue et\nFédération", "Piloter\nl'équilibre",
+             f"{titres_asec} titres sur 10\npour l'ASEC")], 2, T), 7.5),
         (diapo_chiffres("Un championnat peu documenté, des données dispersées",
                         [(f"{saisons}", "saisons\n2016 → 2026"),
                          (f"{len(joues):,}".replace(",", " "), "matchs\ncollectés"),
                          ("4", "sources web\net API"),
-                         ("6", "modèles\ncomparés")], 2, T), 5.5),
+                         ("6", "modèles\ncomparés")], 3, T), 5.5),
         (diapo_titre("Une vraie plateforme de données", "Collecte automatique → 3 bases → "
-                     "modèles → tableau de bord", FIG / "00_architecture.png", 3, T,
+                     "modèles → tableau de bord", FIG / "00_architecture.png", 4, T,
                      "Python · MongoDB · PostgreSQL · PyTorch · Streamlit"), 6.5),
         (diapo_titre(f"Constat n°1 : {pct['N']:.0f} % de matchs nuls",
                      "≈ 25 % en Europe — et à peine 2 buts par match",
-                     FIG / "01_resultats_par_saison.png", 4, T), 6.5),
+                     FIG / "01_resultats_par_saison.png", 5, T), 6.5),
         (diapo_titre(f"4 scores = {part4:.0f} % des matchs", "1-1, 1-0, 0-0, 0-1 : un "
-                     "championnat très fermé", FIG / "02_scores.png", 5, T), 5.0),
+                     "championnat très fermé", FIG / "02_scores.png", 6, T), 5.0),
         (diapo_titre("Le score Elo raconte la hiérarchie", "Recalculé après chacun des "
-                     f"{len(joues):,} matchs".replace(",", " "), FIG / "03_elo.png", 6, T,
+                     f"{len(joues):,} matchs".replace(",", " "), FIG / "03_elo.png", 7, T,
                      "L'ASEC Mimosas domine la décennie"), 6.5),
         (diapo_titre("Le réseau des transferts", "961 mouvements de joueurs · PageRank · "
-                     "communautés de Louvain", FIG / "05_reseau.png", 7, T,
+                     "communautés de Louvain", FIG / "05_reseau.png", 8, T,
                      "L'ASEC, plaque tournante vers l'Europe (Beveren…)"), 6.5),
         (diapo_titre("6 modèles, une validation honnête", "Découpage temporel : chaque "
                      "saison prédite avec les précédentes uniquement",
-                     FIG / "06_comparaison_modeles.png", 8, T), 7.0),
+                     FIG / "06_comparaison_modeles.png", 9, T), 7.0),
         (diapo_titre("Le gain est-il réel ?", "Bootstrap : intervalles de confiance à 95 %",
-                     FIG / "08_bootstrap.png", 9, T,
+                     FIG / "08_bootstrap.png", 10, T,
                      "Tous battent le hasard… mais une seule saison ne suffit pas à trancher"),
          6.5),
         (diapo_message([("La leçon", 46, ENCRE_2),
@@ -150,11 +189,11 @@ def construire_diapos() -> list[tuple[Image.Image, float]]:
                          f"{moy.loc['naif', 'accuracy']:.0%} pour « toujours domicile »"),
                          40, ENCRE_2),
                         ("Avec peu de données, l'évaluation compte plus que l'algorithme.",
-                         40, VERT)], 10, T), 6.5),
+                         40, VERT)], 11, T), 6.5),
     ]
     capture = CAPTURES / "Prediction.png"
     if capture.exists():
-        img, dr = _cadre(11, T)
+        img, dr = _cadre(12, T)
         dr.text((80, 60), "Un tableau de bord en ligne", font=_police(True, 58), fill=ENCRE)
         dr.text((80, 140), "Classements, fiches clubs, réseau, prédictions des prochains "
                 "matchs", font=_police(False, 34), fill=ENCRE_2)

@@ -12,6 +12,11 @@ from commun import (
 
 configurer()
 st.title("Prédiction des matchs 2026-2027")
+st.markdown(
+    "<p style='color:#57606A;font-size:1.05rem'>"
+    "Pour les médias et les supporters : des probabilités expliquées pour situer "
+    "chaque affiche — pas un outil de paris."
+    "</p>", unsafe_allow_html=True)
 
 m = metriques()
 prochains = charger_modele("predictions_a_venir")
