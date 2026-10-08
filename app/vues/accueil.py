@@ -1,4 +1,4 @@
-"""Page d'accueil : chiffres clés, palmarès, carte, synthèse des modèles."""
+"""Page d'accueil : objectif et impact, chiffres clés, palmarès, carte, synthèse des modèles."""
 import plotly.express as px
 import streamlit as st
 from commun import (
@@ -14,17 +14,73 @@ from commun import (
 configurer()
 
 st.title("Ligue 1 ivoirienne — la data du championnat")
-st.markdown(
-    "Dix saisons de **MTN Ligue 1** (2016 → 2026) collectées automatiquement sur le web, "
-    "structurées dans **MongoDB → PostgreSQL**, analysées en SQL et en réseau, puis "
-    "utilisées pour **prédire l'issue des matchs** avec plusieurs modèles, dont un "
-    "réseau de neurones."
-)
 
 matchs = charger("matchs")
 joues = matchs[matchs["statut"] == "joue"]
 palmares = charger("palmares")
 clubs = charger("clubs")
+resultats = charger("resultats_club")
+mouvements = charger("reseau_mouvements")
+
+st.markdown(
+    "#### Objectif\n"
+    "La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe, mais ses "
+    "données sont dispersées, incomplètes et presque jamais analysées. Ce projet les "
+    "rassemble dans une **base fiable, sourcée et gratuite**, pour que les acteurs du "
+    "football ivoirien puissent **décider avec des faits plutôt qu'avec des impressions**."
+)
+
+# Faits calculés sur les données : chaque impact s'appuie sur un constat mesuré
+par_lieu = resultats.groupby(["club", "a_domicile"])["points"].mean().unstack()
+par_lieu = par_lieu[resultats.groupby("club").size() >= 120]
+ecart = (par_lieu[True] - par_lieu[False]).sort_values()
+club_ecart = ecart.index[0]
+departs = mouvements[mouvements["depart_ligue1"].astype(bool)
+                     & ~mouvements["arrivee_ligue1"].astype(bool)]
+part_asec = (departs["depart"] == "ASEC Mimosas").mean()
+titres_asec = int((palmares["champion"] == "ASEC Mimosas").sum())
+pct_nuls = (joues["resultat"] == "N").mean()
+
+impacts = [
+    ("Clubs et entraîneurs", "Mesurer sa performance sans cellule data",
+     (f"{club_ecart} prend moins de points à domicile "
+     f"({par_lieu.loc[club_ecart, True]:.2f} par match) qu'à l'extérieur "
+     f"({par_lieu.loc[club_ecart, False]:.2f}) : un signal concret à travailler."),
+     "Fiche club · Championnat"),
+    ("Joueurs, agents, recruteurs", "Rendre visibles les talents locaux",
+     (f"{len(departs)} départs suivis vers {departs['arrivee'].nunique()} clubs hors "
+      "Ligue 1 (Europe, Maghreb, Afrique de l'Est…), "
+     f"dont {part_asec:.0%} depuis la seule ASEC : les joueurs des autres clubs restent "
+     "peu exposés."),
+     "Réseau des clubs"),
+    ("Médias et supporters", "Débattre avec des chiffres vérifiés",
+     ("Scores recoupés entre trois sources, écarts signalés, probabilités de match "
+     "expliquées plutôt qu'un pronostic tranché."),
+     "Prédiction · Modèles"),
+    ("Ligue et Fédération", "Piloter l'équilibre du championnat",
+     (f"{titres_asec} titres sur {len(palmares)} pour l'ASEC, {pct_nuls:.0%} de nuls : des "
+     "indicateurs pour évaluer le format, le calendrier et l'attractivité du "
+     "championnat."),
+     "Championnat"),
+]
+colonnes = st.columns(4)
+for col, (public, but, fait, pages) in zip(colonnes, impacts, strict=True):
+    with col.container(border=True, height="stretch"):
+        st.markdown(f"**{public}**")
+        st.markdown(f"<span style='color:{ORANGE};font-weight:600'>{but}</span>",
+                    unsafe_allow_html=True)
+        st.markdown(fait)
+        st.caption(f"Pages : {pages}")
+st.caption("Ce tableau de bord n'est pas un outil de paris : les probabilités servent à "
+           "comprendre le championnat, pas à miser.")
+
+st.markdown(
+    "#### Le projet en chiffres\n"
+    "Dix saisons de **MTN Ligue 1** (2016 → 2026) collectées automatiquement sur le web, "
+    "structurées dans **MongoDB → PostgreSQL**, analysées en SQL et en réseau, puis "
+    "utilisées pour **prédire l'issue des matchs** avec six modèles, dont un réseau de "
+    "neurones."
+)
 
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Saisons", matchs["saison"].nunique())

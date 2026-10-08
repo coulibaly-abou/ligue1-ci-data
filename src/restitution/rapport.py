@@ -135,6 +135,28 @@ def construire():
     b_best = boot[meilleur]["glissante"]
     significatif = b_best["ic95"][1] < 0
     proto = m["protocole"]
+    resultats = pd.read_parquet(DATA / "resultats_club.parquet")
+    par_lieu = resultats.groupby(["club", "a_domicile"])["points"].mean().unstack()
+    par_lieu = par_lieu[resultats.groupby("club").size() >= 120]
+    club_ecart = (par_lieu[True] - par_lieu[False]).idxmin()
+    departs = mvts[mvts["depart_ligue1"].astype(bool) & ~mvts["arrivee_ligue1"].astype(bool)]
+    impacts = [
+        ("Clubs et entraîneurs", "Mesurer sa performance sans cellule data",
+         (f"{club_ecart} prend moins de points à domicile "
+         f"({par_lieu.loc[club_ecart, True]:.2f} par match) qu'à l'extérieur "
+         f"({par_lieu.loc[club_ecart, False]:.2f}) : un axe de travail concret.")),
+        ("Joueurs, agents, recruteurs", "Rendre visibles les talents locaux",
+         (f"{len(departs)} départs suivis vers {departs['arrivee'].nunique()} clubs hors "
+         f"Ligue 1, dont {(departs['depart'] == 'ASEC Mimosas').mean():.0%} depuis la seule "
+         "ASEC : les joueurs des autres clubs restent peu exposés.")),
+        ("Médias et supporters", "Débattre avec des chiffres vérifiés",
+         ("Scores recoupés entre trois sources (11 écarts signalés) ; probabilités de match "
+         "expliquées plutôt qu'un pronostic tranché.")),
+        ("Ligue et Fédération", "Piloter l'équilibre du championnat",
+         (f"{asec} titres sur {len(palmares)} pour l'ASEC, {pct['N']:.0f} % de nuls, "
+         f"{buts:.2f} buts par match : des indicateurs pour évaluer le format, le "
+         "calendrier et l'attractivité.")),
+    ]
     confusion = pd.DataFrame(m["confusions"][retenu])   # lignes = réel, colonnes = prédit
     predits_n = int(confusion["prédit N"].sum())
     bons_n = int(confusion.loc["réel N", "prédit N"])
@@ -178,7 +200,21 @@ def construire():
               "avec ~1 500 matchs d'entraînement : un résultat honnête, cohérent avec la "
               "littérature sur la prédiction du football."),
           figure("00_architecture", "Figure 1 — Architecture : chaque base a un rôle unique."),
-          PageBreak()]
+          PageBreak(),
+          Paragraph("Objectif et impact", S["h1"]),
+          p("La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe, mais "
+            "ses données sont dispersées, incomplètes et presque jamais analysées. "
+            "<b>L'objectif est de les rassembler dans une base fiable, sourcée et "
+            "gratuite</b>, pour que les acteurs du football ivoirien décident avec des faits "
+            "plutôt qu'avec des impressions. Chaque usage ci-dessous s'appuie sur un constat "
+            "mesuré dans les données."),
+          tableau([["Pour qui", "Ce que ça change", "Constat mesuré"]] + [
+              [Paragraph(a, S["p"]), Paragraph(b, S["p"]), Paragraph(c, S["p"])]
+              for a, b, c in impacts],
+              [3.3 * cm, 4.2 * cm, 7.9 * cm]),
+          p("<b>Ce que ce projet n'est pas</b> : un outil de paris. Les probabilités servent "
+            "à comprendre le championnat et à situer une affiche, pas à miser."),
+          Spacer(1, 0.2 * cm)]
 
     # ------------------------------------------------------- 1. données
     h += [Paragraph("1. Données : sources, volumes, qualité", S["h1"]),

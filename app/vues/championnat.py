@@ -14,6 +14,11 @@ from commun import (
 
 configurer()
 st.title("Championnat")
+st.markdown(
+    "<p style='color:#57606A;font-size:1.05rem'>"
+    "Pour la Ligue, les médias et les supporters : suivre la hiérarchie, "
+    "l'équilibre du championnat et le poids réel de l'avantage du terrain."
+    "</p>", unsafe_allow_html=True)
 
 classement = charger("classement_journee")
 resultats_saison = charger("resultats_saison")

@@ -6,6 +6,11 @@ from commun import ORANGE, VERT, charger, configurer, pied_de_page
 configurer()
 st.title("Réseau des clubs : où vont les joueurs ?")
 st.markdown(
+    "<p style='color:#57606A;font-size:1.05rem'>"
+    "Pour les joueurs, agents et recruteurs : quels clubs exposent leurs joueurs, "
+    "vers quels championnats ils partent, et quels clubs restent hors des radars."
+    "</p>", unsafe_allow_html=True)
+st.markdown(
     "Deux clubs sont reliés quand un joueur passe de l'un à l'autre : **carrières "
     "Wikipédia** (≈ 460 joueurs et entraîneurs) et **transferts API-Football** (2022 → 2026). "
     "La taille d'un club = son **PageRank** : un club est central s'il échange des joueurs "

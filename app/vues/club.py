@@ -15,6 +15,11 @@ from commun import (
 
 configurer()
 st.title("Fiche club")
+st.markdown(
+    "<p style='color:#57606A;font-size:1.05rem'>"
+    "Pour les clubs et leurs staffs : un bilan objectif — forme, régularité, "
+    "performance à domicile et à l'extérieur — à comparer d'une saison à l'autre."
+    "</p>", unsafe_allow_html=True)
 
 resultats = charger("resultats_club")
 classement = charger("classement_journee")

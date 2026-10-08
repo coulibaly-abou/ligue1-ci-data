@@ -15,6 +15,11 @@ from commun import (
 
 configurer()
 st.title("Comparaison des modèles de prédiction")
+st.markdown(
+    "<p style='color:#57606A;font-size:1.05rem'>"
+    "Pour juger la fiabilité des prédictions : comment elles sont produites, et "
+    "avec quelle marge d'erreur."
+    "</p>", unsafe_allow_html=True)
 
 m = metriques()
 if m is None:

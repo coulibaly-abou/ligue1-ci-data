@@ -5,9 +5,15 @@
 
 ---
 
-⚽ J'ai essayé de prédire les matchs de la Ligue 1 ivoirienne avec la data et l'IA.
+⚽ La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe… mais presque personne n'analyse ses données.
 
-Le football ivoirien produit des talents partout en Europe, mais ses données sont dispersées et presque jamais analysées. J'ai donc construit, de A à Z, une plateforme de données sur 10 saisons de MTN Ligue 1 (2016 → 2026).
+Résultat : les clubs décident sans chiffres, les talents des « petits » clubs passent sous les radars, et le débat se fait sur des impressions.
+
+J'ai donc construit, de A à Z, une plateforme de données ouverte sur 10 saisons de MTN Ligue 1 (2016 → 2026), pensée pour ceux qui font ce championnat :
+• Clubs et entraîneurs → mesurer sa performance sans cellule data (exemple : CO Korhogo prend moins de points à domicile qu'à l'extérieur sur 148 matchs)
+• Joueurs et recruteurs → rendre visibles les talents locaux (563 départs suivis : 42 % viennent de la seule ASEC, les autres clubs restent peu exposés)
+• Médias et supporters → débattre avec des chiffres vérifiés et recoupés
+• Ligue et Fédération → suivre l'équilibre du championnat (6 titres sur 10 pour l'ASEC)
 
 🔧 Ce que j'ai construit
 • Collecte automatisée (RSSSF, Wikipédia, Futbol24, API-Football), dans le respect des robots.txt et des CGU
@@ -22,7 +28,7 @@ Le football ivoirien produit des talents partout en Europe, mais ses données so
 • À peine 2 buts par match : 1-1, 1-0, 0-0 et 0-1 couvrent plus de la moitié des matchs
 • L'ASEC Mimosas a remporté 6 des 10 derniers titres et est le club le plus central du réseau des transferts
 
-🧠 Le résultat qui m'a le plus appris
+🧠 Et peut-on prédire les matchs ? Le résultat qui m'a le plus appris
 Le meilleur modèle n'est pas le réseau de neurones : c'est un simple score Elo.
 → 43,7 % de bons pronostics, contre 35,4 % pour « toujours parier sur l'équipe qui reçoit »
 → une validation temporelle sur 1 141 matchs : chaque saison est prédite uniquement à partir des précédentes

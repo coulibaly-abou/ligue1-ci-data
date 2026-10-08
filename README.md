@@ -4,6 +4,22 @@ Pipeline de données complet sur 10 saisons de MTN Ligue 1 (2016 → 2026) : col
 MongoDB, PostgreSQL, réseau des clubs, six modèles de prédiction (dont un réseau de neurones
 PyTorch) et tableau de bord Streamlit.
 
+## Objectif et impact
+
+La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe, mais ses données
+sont dispersées, incomplètes et presque jamais analysées. Ce projet les rassemble dans une
+base fiable, sourcée et gratuite, pour que les acteurs du football ivoirien décident avec des
+faits plutôt qu'avec des impressions.
+
+| Pour qui | Ce que ça change | Constat mesuré |
+|---|---|---|
+| Clubs et entraîneurs | mesurer sa performance sans cellule data | CO Korhogo prend moins de points à domicile (0,89 par match) qu'à l'extérieur (1,28) sur 148 matchs |
+| Joueurs, agents, recruteurs | rendre visibles les talents locaux | 563 départs suivis vers 402 clubs hors Ligue 1, dont 42 % depuis la seule ASEC |
+| Médias et supporters | débattre avec des chiffres vérifiés | scores recoupés entre trois sources, probabilités de match expliquées |
+| Ligue et Fédération | piloter l'équilibre du championnat | 6 titres sur 10 pour l'ASEC, 30 % de nuls, 2 buts par match |
+
+Ce n'est pas un outil de paris : les probabilités servent à comprendre le championnat.
+
 ![Architecture](docs/figures/00_architecture.png)
 
 **Démo** : _lien Streamlit Community Cloud à ajouter après déploiement_ ·
