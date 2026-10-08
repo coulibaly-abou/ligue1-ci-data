@@ -1,0 +1,23 @@
+# Lint + tests à chaque push et pull request (sans bases de données ni PyTorch :
+# le test du réseau de neurones est sauté automatiquement).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dépendances
+        run: pip install -e ".[dev]" scikit-learn joblib networkx pyarrow
+      - name: Lint
+        run: ruff check .
+      - name: Tests
+        run: pytest --cov=src/collecte/parsers --cov=src/etl --cov=src/modele --cov-report=term
