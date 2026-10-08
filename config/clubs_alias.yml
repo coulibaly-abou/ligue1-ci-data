@@ -1,0 +1,52 @@
+# Normalisation des noms de clubs ivoiriens.
+# Nom retenu : [autres écritures rencontrées dans les sources]
+#
+# La comparaison ignore la casse, les accents, la ponctuation et ce qui est entre
+# parenthèses (ville) : « Stade (Abidjan) » et « stade d'abidjan » sont trouvés sans
+# alias. Les lettres de note collées des classements Wikipédia (« SOAT », « WACP »)
+# sont retirées automatiquement si le nom n'est pas reconnu tel quel.
+#
+# Cas vérifiés à la main :
+# - « SOFC Abobo » (Wikipédia) = « SOL FC » (Futbol24, RSSSF « SOL FC (Abobo) ») :
+#   les deux sources listent les mêmes 16 clubs en 2026-2027 sauf ce nom.
+# - « SC Adjamé » (2025-2026 et après) = « Stella Club d'Adjamé ».
+# - « AFAD Plateau » (Futbol24) = « AFAD Djékanou » (Académie de Foot Amadou Diallo).
+# - « OSA » = FC Olympic Sport d'Abobo, club différent de SOL FC.
+
+AFAD Djékanou: [AFAD, AFAD Plateau, Acad. F. Amadou Diallo, Acad. F Amadou Diallo,
+  Academie de Foot Amadou Diallo, Académie de Foot Amadou Diallo, JMG Academy (Djékanou)]
+ASEC Mimosas: [ASEC, Asec Mimosas, ASEC Abidjan, Mimosas]
+Africa Sports: [Africa Sports d'Abidjan, Africa Sports National, Africa]
+AS Denguélé: [Denguélé, Denguelé Sports, Denguélé d'Odienné, AS Denguelé, Denguele]
+AS Indenié Abengourou: [ASI Abengourou, ASI d'Abengourou, AS Indenié, Abengourou,
+  Alliance Indenié d'Abengourou]
+AS Tanda: [Tanda, Association Sportive de Tanda, Association Sportive Tanda]
+Bouaké FC: [Bouaké, Bouake FC, Bouaké Football Club]
+CO Korhogo: [Korhogo, CO Korogho, Club omnisports de Korhogo]
+ES Agboville: [ES d'Agboville, Entente sportive d'Agboville]
+ES Bafing: [Entente sportive du Bafing]
+FC Mouna: [Mouna, Mouna FC, Football Club Mouna]
+FC San-Pédro: [San-Pédro, San-Pédro FC, San Pédro, San Pedro, FC San Pédro,
+  Football Club de San-Pédro, Football Club San-Pédro]
+FC Olympic Sport d'Abobo: [OSA, FCOS Abobo, Olympique Sport d'Abobo, Olympic Sport Abobo,
+  FC OSA]
+Inova SCA: [ISCA, Inova Sporting Club d'Abidjan]
+Issia Wazi: [Issia Wazi FC, Issia Wazy]
+JC Abidjan: [JCAT, Jeunesse Club d'Abidjan, Jeunesse Club d'Abidjan Treichville]
+LYS Sassandra: [Limane Yacouba Sylla FC Sassandra, Lys Sasandra,
+  Limane Yacouba Sylla Football Club de Sassandra]
+Moossou FC: [Moossou, FC Moossou, Mossou FC, Moossou Football Club]
+OFC Adiaké: [Olymp Adiaké, Olympique FC Adiaké]
+Racing Club d'Abidjan: [Racing Club, RC Abidjan, RCA, Racing d'Abidjan, Racing Club Abidjan]
+SC Gagnoa: [Gagnoa, Sporting Club de Gagnoa, Sporting Gagnoa]
+SO Armée: [SOA, Société Omnisports de l'Armée, SO de l'Armée]
+SOL FC: [SOL, SOFC Abobo, SOL FC Abobo, Stars Olympic Club Abobo,
+  Stars Olympic Football Club d'Abobo]
+Séwé Sport: [Séwé Sports, Séwé Sport de San-Pédro, Séwé Sports de San-Pédro, Séwé FC]
+Stade d'Abidjan: [Stade]
+Stella Club d'Adjamé: [Stella, Stella Club, Stella d'Adjamé, SC Adjamé]
+US Tchologo: [Tchologo]
+USC Bassam: [Bassam, USCB, Union sportive des clubs de Bassam]
+Williamsville AC: [WAC, Williamsville, Williamsville Athletic Club]
+Yamoussoukro FC: [Yamoussoukro]
+Zoman FC: [Zoman, Zoman Football Club]

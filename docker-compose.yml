@@ -1,0 +1,37 @@
+# Lance les 3 bases de données : docker compose up -d
+services:
+  mongo:
+    image: mongo:7
+    container_name: ligue1-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    image: postgres:16
+    container_name: ligue1-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ligue1
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  neo4j:
+    image: neo4j:5
+    container_name: ligue1-neo4j
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER}/${NEO4J_PASSWORD}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  mongo_data:
+  pg_data:
+  neo4j_data:

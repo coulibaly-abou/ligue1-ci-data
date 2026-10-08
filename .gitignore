@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+models/*
+!models/.gitkeep
+logs/
+*.egg-info/
+.coverage
+.pytest_cache/
+.ruff_cache/
+# Vidéo générée (29 Mo) : à publier sur LinkedIn, pas à versionner
+docs/linkedin/video_ligue1.mp4
