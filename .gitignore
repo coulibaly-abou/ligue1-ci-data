@@ -12,3 +12,5 @@ logs/
 .ruff_cache/
 # Vidéo générée (29 Mo) : à publier sur LinkedIn, pas à versionner
 docs/linkedin/video_ligue1.mp4
+docs/linkedin/video_ligue1_pro*.mp4
+docs/linkedin/audio/
