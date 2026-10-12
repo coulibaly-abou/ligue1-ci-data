@@ -1,65 +1,61 @@
-# Post LinkedIn — à publier avec la vidéo `video_ligue1.mp4`
+# Post LinkedIn — à publier avec la vidéo `video_ligue1_pro.mp4` (+ sous-titres `.srt`)
 
-> Mettre le lien GitHub et le lien de la démo Streamlit **en premier commentaire**
-> (LinkedIn réduit la portée des posts qui contiennent un lien).
+> Les liens sont dans le post (version « tout-en-un »). Variante possible : les déplacer en
+> premier commentaire, LinkedIn mettant parfois moins en avant les posts qui contiennent un lien.
+> Le dépôt `ligue1-ci-data` doit être publié (public) sur GitHub avant de poster.
 
 ## Phrase de présentation (à réutiliser : résumé LinkedIn, CV, portfolio)
 
-> J'ai développé une solution Data Science complète dédiée à la Ligue 1 Côte d'Ivoire :
-> collecte automatisée de 10 saisons (1 934 matchs, 31 clubs), analyses statistiques et
-> de réseau, comparaison de six modèles de Machine Learning en validation temporelle
-> (43,7 % de bons pronostics contre 35,4 % pour la référence), jusqu'au déploiement d'une
-> application interactive.
+> J'ai réalisé un projet Data Science complet sur la Ligue 1 Côte d'Ivoire : collecte
+> automatisée de 10 saisons (1 934 matchs, 31 clubs), bases MongoDB et PostgreSQL, analyses
+> statistiques et de réseau, comparaison de six modèles de Machine Learning en validation
+> temporelle (43,7 % de bons pronostics contre 35,4 % pour la référence naïve), et une
+> application Streamlit interactive.
 
 ---
 
-⚽ La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe… mais presque personne n'analyse ses données.
+⚽📊 La Ligue 1 ivoirienne forme des joueurs pour toute l'Afrique et l'Europe… mais ses données sont dispersées et presque jamais analysées.
 
-Résultat : les clubs décident sans chiffres, les talents des « petits » clubs passent sous les radars, et le débat se fait sur des impressions.
+J'en ai fait mon projet personnel de Data Science : 10 saisons de MTN Ligue 1 (2016 → 2026), de la collecte web jusqu'à la prédiction des matchs.
 
-J'ai donc construit, de A à Z, une plateforme de données ouverte sur 10 saisons de MTN Ligue 1 (2016 → 2026), pensée pour ceux qui font ce championnat :
-• Clubs et entraîneurs → mesurer sa performance sans cellule data (exemple : CO Korhogo prend moins de points à domicile qu'à l'extérieur sur 148 matchs)
-• Joueurs et recruteurs → rendre visibles les talents locaux (563 départs suivis : 42 % viennent de la seule ASEC, les autres clubs restent peu exposés)
-• Médias et supporters → débattre avec des chiffres vérifiés et recoupés
-• Ligue et Fédération → suivre l'équilibre du championnat (6 titres sur 10 pour l'ASEC)
+❓ La question de départ
+Que révèlent les données publiques sur ce championnat ? Et peut-on prédire un match mieux qu'une règle naïve ?
 
 🔧 Ce que j'ai construit
-• Collecte automatisée (RSSSF, Wikipédia, Futbol24, API-Football), dans le respect des robots.txt et des CGU
-• MongoDB pour les données brutes : chaque page est archivée avec son URL et sa date
-• PostgreSQL : modèle Merise, ETL avec recoupement des sources, 10 requêtes SQL (fonctions de fenêtre, CTE)
-• Un graphe de 961 mouvements de joueurs : PageRank et communautés de clubs
-• 6 modèles de prédiction : Elo, régression logistique, forêt aléatoire, gradient boosting, réseau de neurones PyTorch
-• Un tableau de bord Streamlit avec les probabilités des prochains matchs
+• Collecte automatisée de 4 sources (RSSSF, Wikipédia, Futbol24, API-Football), dans le respect des robots.txt et des CGU
+• MongoDB pour les données brutes : 711 pages archivées avec leur URL et leur date
+• Un ETL qui recoupe les scores et harmonise 102 noms en 31 clubs → PostgreSQL (modèle Merise, 12 tables, 10 requêtes SQL)
+• Un graphe de 961 mouvements de joueurs : PageRank, intermédiarité, communautés
+• 6 modèles comparés : Elo, régression logistique, forêt aléatoire, gradient boosting, réseau de neurones PyTorch et une référence naïve
+• Une application Streamlit : classements, fiches clubs, réseau, probabilités des prochains matchs
 
-📊 Ce que disent les données
-• 30 % des matchs se terminent par un nul (≈ 25 % en Europe)
-• À peine 2 buts par match : 1-1, 1-0, 0-0 et 0-1 couvrent plus de la moitié des matchs
-• L'ASEC Mimosas a remporté 6 des 10 derniers titres et est le club le plus central du réseau des transferts
+📈 Ce que montrent les données (1 934 matchs)
+• 30 % des matchs se terminent par un nul
+• À peine 2 buts par match en moyenne
+• L'ASEC Mimosas : 6 titres sur 10, et 42 % des départs suivis vers des clubs hors Ligue 1
 
-🧠 Et peut-on prédire les matchs ? Le résultat qui m'a le plus appris
-Le meilleur modèle n'est pas le réseau de neurones : c'est un simple score Elo.
-→ 43,7 % de bons pronostics, contre 35,4 % pour « toujours parier sur l'équipe qui reçoit »
-→ une validation temporelle sur 1 141 matchs : chaque saison est prédite uniquement à partir des précédentes
-→ un bootstrap qui montre que le gain est réel, mais qu'une seule saison ne suffit pas à départager les modèles
+🧠 Le résultat qui m'a le plus appris
+Chaque saison est prédite uniquement avec les saisons précédentes (1 141 matchs).
+→ Un simple modèle Elo atteint 43,7 % de bons pronostics, contre 35,4 % pour la référence naïve
+→ Le gain est significatif (bootstrap, IC 95 %), mais les modèles restent trop proches pour être départagés, et le réseau de neurones ne fait pas mieux qu'un modèle simple
 
-Avec peu de données (≈ 240 matchs par saison), la rigueur de l'évaluation compte plus que la complexité de l'algorithme. Le réseau de neurones fait mieux que la référence naïve, mais pas mieux qu'un modèle simple. Je préfère présenter ce résultat honnête plutôt qu'un chiffre gonflé par une fuite de données.
+Avec peu de données, la rigueur de l'évaluation compte plus que la complexité de l'algorithme. Je préfère un résultat honnête à un chiffre gonflé.
 
-🚀 Prochaines étapes : un modèle de Poisson (Dixon-Coles) pour mieux prédire les nuls, et les événements de match (buteurs, cartons) en cours de collecte.
+🚀 Prochaine étape : un modèle de Poisson (Dixon-Coles) pour mieux prédire les nuls.
 
-Code, rapport et démo en commentaire 👇
+🔗 Code et documentation : https://github.com/coulibaly-abou/ligue1-ci-data
+👤 Mes autres projets : https://github.com/coulibaly-abou
 
-COULIBALY ABOUBAKAR — Data Scientist. Ouvert aux échanges et aux opportunités en Data Science.
+🎓 Étudiant en BUT 3 Science des Données (parcours Exploration et Modélisation Statistique), je recherche un stage et une alternance en Data Science, Data Analysis ou Statistique à partir de septembre 2026. Échangeons !
 
-#DataScience #MachineLearning #Football #CôteDIvoire #Python #SQL #PyTorch #Streamlit #DataEngineering
+#DataScience #DataAnalysis #MachineLearning #Statistique #Python #SQL #PyTorch #Streamlit #Football #CôteDIvoire #Alternance #Stage
 
 ---
 
-## Premier commentaire (à poster juste après)
+## Avant de publier
 
-📂 Code : https://github.com/<ton-compte>/ligue1-ci-data
-📊 Démo en ligne : https://<ton-app>.streamlit.app
-📄 Rapport (10 pages) : dans le dépôt, docs/rapport.pdf
-
-## Visuel de couverture conseillé
-
-`docs/linkedin/diapos/02_carte.png` (carte des clubs) ou `docs/linkedin/diapos/01_intro.png` (identité).
+- Publier le dépôt en public sous le nom `ligue1-ci-data` sur https://github.com/coulibaly-abou
+  (le lien du post renvoie une erreur tant que ce n'est pas fait).
+- Joindre `video_ligue1_pro.mp4` et ajouter `video_ligue1_pro.srt` comme sous-titres.
+- Si l'application est déployée sur Streamlit Community Cloud, ajouter sous le lien du code :
+  `🖥️ Démo en ligne : https://<nom-de-l-app>.streamlit.app`

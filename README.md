@@ -129,5 +129,24 @@ que `app/data/*.parquet` : il se déploie sans base de données.
 
 Post LinkedIn, script de la vidéo, diapositives et vidéo MP4 : [docs/linkedin/](docs/linkedin/).
 
+### Vidéo de présentation narrée (≈ 90 s)
+
+```bash
+streamlit run app/Accueil.py --server.port 8599 --client.toolbarMode viewer   # terminal 1
+python -m src.restitution.video_pro              # terminal 2 (ou : make video-pro), ≈ 8 min
+python -m src.restitution.video_pro --apercu     # images clés seulement (≈ 30 s)
+python -m src.restitution.video_pro --sans-voix  # musique + sous-titres, pour enregistrer sa voix
+python -m src.restitution.video_pro --sans-voix --sans-musique  # muette, sous-titres seuls
+python -m src.restitution.video_pro --controle   # durée, résolution, flux audio du MP4
+```
+
+Sorties : `docs/linkedin/video_ligue1_pro.mp4` (1920×1080, H.264 + AAC), sous-titres
+`video_ligue1_pro.srt` (à joindre sur LinkedIn), images clés `docs/linkedin/diapos_pro/`.
+Voix off : voix française « Paul » de Windows, hors ligne
+([tts_windows.ps1](src/restitution/tts_windows.ps1)) ; musique générée par le script (libre de
+droits). Les chiffres prononcés sont vérifiés contre `app/data/` avant le montage : si le
+pipeline change un résultat, le script s'arrête et indique la phrase à mettre à jour.
+Scénario et textes : [docs/linkedin/script_video_pro.md](docs/linkedin/script_video_pro.md).
+
 Sources : RSSSF © José Batalha / Rec.Sport.Soccer Statistics Foundation ; Wikipédia (CC BY-SA) ;
 Futbol24 ; API-Football.

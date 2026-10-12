@@ -23,3 +23,5 @@ lint:
 	ruff check .
 video:
 	python -m src.restitution.video
+video-pro:
+	python -m src.restitution.video_pro

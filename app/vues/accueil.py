@@ -2,8 +2,10 @@
 import streamlit as st
 from commun import (
     AUTEUR,
+    FORMATION,
     NOMS_MODELES,
     PAGES,
+    RECHERCHE,
     ROLE,
     carte_clubs,
     charger,
@@ -39,11 +41,13 @@ st.markdown(f"""
   <div class="barre"></div>
   <div class="auteur">{AUTEUR}</div>
   <div class="role">{ROLE}</div>
+  <div class="profil">{FORMATION}</div>
   <div class="titre">LIGUE 1 CÔTE D'IVOIRE</div>
   <div class="tag">Data · Statistics · Machine Learning</div>
   <div class="accroche">Une étude complète du championnat ivoirien : {saisons_completes}
   saisons collectées automatiquement, analysées et modélisées pour comprendre les
   performances des clubs et estimer le résultat des matchs.</div>
+  <div class="recherche">{RECHERCHE}</div>
 </div>""", unsafe_allow_html=True)
 
 # --------------------------------------------------------------------- carte
@@ -64,6 +68,12 @@ with droite:
                     f"{'s' if v.n_clubs > 1 else ''}</span></div>", unsafe_allow_html=True)
     st.caption("Survoler un point pour voir les clubs et leurs matchs. Coordonnées : "
                "articles Wikipédia des villes, collectés et contrôlés par le pipeline.")
+
+# ------------------------------------------------------------ problématique
+section("Problématique", "La question de départ")
+st.markdown("<div class='question'>Que peuvent révéler les données publiques, dispersées, "
+            "sur la Ligue 1 ivoirienne ? Et peut-on prédire le résultat d'un match mieux "
+            "qu'une règle naïve ?</div>", unsafe_allow_html=True)
 
 # --------------------------------------------------------------- objectifs
 section("Objectifs de l'étude", "Ce que cherche à établir l'étude",

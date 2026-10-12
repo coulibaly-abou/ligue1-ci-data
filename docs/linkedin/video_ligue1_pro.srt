@@ -1,0 +1,79 @@
+1
+00:00:00,600 --> 00:00:06,290
+Aboubakar Coulibaly, étudiant en BUT 3 Science des Données, parcours Exploration et Modélisation Statistique.
+
+2
+00:00:06,390 --> 00:00:10,875
+Il recherche un stage et une alternance en Data Science, à partir de septembre 2026.
+
+3
+00:00:12,225 --> 00:00:15,076
+La Ligue 1 ivoirienne forme des joueurs pour l'Afrique et l'Europe.
+
+4
+00:00:15,176 --> 00:00:18,030
+Pourtant, ses données sont dispersées et presque jamais analysées.
+
+5
+00:00:18,130 --> 00:00:22,058
+Ce projet rassemble dix saisons : 31 clubs, répartis dans 17 villes.
+
+6
+00:00:23,408 --> 00:00:26,236
+Problématique : que révèlent les données publiques sur ce championnat ?
+
+7
+00:00:26,336 --> 00:00:28,617
+Et peut-on prédire un match mieux qu'une règle naïve ?
+
+8
+00:00:28,717 --> 00:00:32,702
+Quatre objectifs : constituer une base fiable, analyser les performances des clubs,
+
+9
+00:00:32,802 --> 00:00:36,287
+étudier le réseau des mouvements de joueurs, et comparer six modèles de prédiction.
+
+10
+00:00:37,637 --> 00:00:40,714
+Quatre sources web sont collectées en Python et archivées dans MongoDB.
+
+11
+00:00:40,814 --> 00:00:46,874
+Un ETL recoupe les scores et harmonise 102 noms en 31 clubs : 1 934 matchs dans PostgreSQL.
+
+12
+00:00:46,974 --> 00:00:51,561
+Méthodes : requêtes SQL, analyse de réseau, et Machine Learning en validation temporelle.
+
+13
+00:00:52,911 --> 00:00:56,550
+Premiers constats : 30 % de matchs nuls, à peine 2 buts par match,
+
+14
+00:00:56,650 --> 00:00:58,645
+et 6 titres sur 10 pour l'ASEC Mimosas.
+
+15
+00:00:59,995 --> 00:01:03,977
+Chaque saison est prédite avec les seules saisons précédentes : 1 141 matchs.
+
+16
+00:01:04,077 --> 00:01:10,610
+Un simple modèle Elo atteint 43,7 % de bons pronostics, contre 35,4 % pour la référence naïve.
+
+17
+00:01:10,710 --> 00:01:14,427
+Le gain est significatif, mais les modèles restent trop proches pour être départagés.
+
+18
+00:01:15,777 --> 00:01:19,216
+L'application Streamlit donne ensuite les probabilités de chaque match à venir.
+
+19
+00:01:20,566 --> 00:01:23,319
+De la collecte web au Machine Learning : un projet complet.
+
+20
+00:01:23,419 --> 00:01:27,893
+Aboubakar Coulibaly recherche un stage et une alternance à partir de septembre 2026.

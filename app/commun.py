@@ -10,7 +10,12 @@ import streamlit as st
 DATA = Path(__file__).parent / "data"
 FIGURES = Path(__file__).parent.parent / "docs" / "figures"
 
-AUTEUR, ROLE = "COULIBALY ABOUBAKAR", "Data Scientist"
+AUTEUR = "ABOUBAKAR COULIBALY"
+ROLE = "Data Science · Analyse de données · Modélisation statistique"
+FORMATION = "Étudiant en BUT 3 Science des Données — Parcours EMS"
+RECHERCHE = "À la recherche d'un stage et d'une alternance à partir de septembre 2026"
+LIENS = {"GitHub": "https://github.com/coulibaly-abou",
+         "LinkedIn": "https://linkedin.com/in/aboubakar-coulibaly-b028962bb"}
 TITRE_PROJET = "Ligue 1 Côte d'Ivoire — Data Science & Machine Learning"
 
 # Palette validée (contraste ≥ 3:1, séparation daltonisme) : orange = domicile,
@@ -77,6 +82,25 @@ h1, h2, h3 {{color: {ENCRE}; letter-spacing: -0.01em;}}
 .marque .n {{font-weight:800; letter-spacing:.14em; font-size:.85rem; color:{ENCRE};}}
 .marque .r {{color:{ORANGE}; font-weight:600; font-size:.85rem;}}
 .marque .p {{color:{ENCRE_2}; font-size:.78rem; margin-top:.25rem;}}
+.marque a, .pied a {{color:{ORANGE}; text-decoration:none; font-weight:600;}}
+.hero .profil {{font-size:.9rem; color:#C8D3CD; margin-top:.35rem;}}
+.hero .recherche {{display:inline-block; margin-top:.9rem; padding:.35rem .8rem;
+                  border:1px solid rgba(245,160,74,.6); border-radius:999px;
+                  color:#F5A04A; font-size:.88rem; font-weight:600;}}
+.question {{border-left:5px solid {ORANGE}; background:#FBF8F4; border-radius:12px;
+           padding:18px 22px; font-size:1.18rem; font-weight:650; color:{ENCRE};
+           line-height:1.45; margin:.4rem 0 1rem;}}
+/* Téléphones : bannière et cartes plus compactes */
+@media (max-width: 640px) {{
+  .block-container {{padding-left:1rem; padding-right:1rem;}}
+  .hero {{padding:28px 22px 26px;}}
+  .hero .titre {{font-size:2.1rem; margin-top:1rem;}}
+  .hero .tag {{letter-spacing:.14em; font-size:.85rem;}}
+  .titre-section {{font-size:1.4rem;}}
+  .carte-axe {{min-height:0; margin-bottom:.6rem;}}
+  .kpi {{margin-bottom:.6rem;}}
+  .kpi .val {{font-size:1.7rem;}}
+}}
 </style>"""
 
 
@@ -127,9 +151,14 @@ def kpis(valeurs: list[tuple[str, str]]) -> None:
                      f"<div class='lib'>{lib}</div></div>", unsafe_allow_html=True)
 
 
+def liens_html(separateur: str = " · ") -> str:
+    return separateur.join(f"<a href='{url}' target='_blank'>{nom}</a>"
+                           for nom, url in LIENS.items())
+
+
 def pied_de_page() -> None:
-    st.markdown(f"<div class='pied'><span><b>{AUTEUR}</b> · {ROLE}</span>"
-                f"<span>{TITRE_PROJET}</span><span>{SOURCES}</span></div>",
+    st.markdown(f"<div class='pied'><span><b>{AUTEUR}</b> · {FORMATION} · "
+                f"{liens_html()}</span><span>{TITRE_PROJET}</span><span>{SOURCES}</span></div>",
                 unsafe_allow_html=True)
 
 
