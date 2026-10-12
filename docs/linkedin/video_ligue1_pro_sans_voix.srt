@@ -3,77 +3,77 @@
 Aboubakar Coulibaly, étudiant en BUT 3 Science des Données, parcours Exploration et Modélisation Statistique.
 
 2
-00:00:06,390 --> 00:00:10,875
-Il recherche un stage et une alternance en Data Science, à partir de septembre 2026.
+00:00:06,390 --> 00:00:08,980
+Il recherche un stage et une alternance en Data Science.
 
 3
-00:00:12,225 --> 00:00:15,076
+00:00:10,330 --> 00:00:13,180
 La Ligue 1 ivoirienne forme des joueurs pour l'Afrique et l'Europe.
 
 4
-00:00:15,176 --> 00:00:18,030
+00:00:13,280 --> 00:00:16,135
 Pourtant, ses données sont dispersées et presque jamais analysées.
 
 5
-00:00:18,130 --> 00:00:22,058
+00:00:16,235 --> 00:00:20,163
 Ce projet rassemble dix saisons : 31 clubs, répartis dans 17 villes.
 
 6
-00:00:23,408 --> 00:00:26,236
+00:00:21,513 --> 00:00:24,340
 Problématique : que révèlent les données publiques sur ce championnat ?
 
 7
-00:00:26,336 --> 00:00:28,617
+00:00:24,440 --> 00:00:26,722
 Et peut-on prédire un match mieux qu'une règle naïve ?
 
 8
-00:00:28,717 --> 00:00:32,702
+00:00:26,822 --> 00:00:30,807
 Quatre objectifs : constituer une base fiable, analyser les performances des clubs,
 
 9
-00:00:32,802 --> 00:00:36,287
+00:00:30,907 --> 00:00:34,392
 étudier le réseau des mouvements de joueurs, et comparer six modèles de prédiction.
 
 10
-00:00:37,637 --> 00:00:40,714
+00:00:35,742 --> 00:00:38,819
 Quatre sources web sont collectées en Python et archivées dans MongoDB.
 
 11
-00:00:40,814 --> 00:00:46,874
+00:00:38,919 --> 00:00:44,979
 Un ETL recoupe les scores et harmonise 102 noms en 31 clubs : 1 934 matchs dans PostgreSQL.
 
 12
-00:00:46,974 --> 00:00:51,561
+00:00:45,079 --> 00:00:49,666
 Méthodes : requêtes SQL, analyse de réseau, et Machine Learning en validation temporelle.
 
 13
-00:00:52,911 --> 00:00:56,550
+00:00:51,016 --> 00:00:54,655
 Premiers constats : 30 % de matchs nuls, à peine 2 buts par match,
 
 14
-00:00:56,650 --> 00:00:58,645
+00:00:54,755 --> 00:00:56,750
 et 6 titres sur 10 pour l'ASEC Mimosas.
 
 15
-00:00:59,995 --> 00:01:03,977
+00:00:58,100 --> 00:01:02,081
 Chaque saison est prédite avec les seules saisons précédentes : 1 141 matchs.
 
 16
-00:01:04,077 --> 00:01:10,610
+00:01:02,181 --> 00:01:08,714
 Un simple modèle Elo atteint 43,7 % de bons pronostics, contre 35,4 % pour la référence naïve.
 
 17
-00:01:10,710 --> 00:01:14,427
+00:01:08,814 --> 00:01:12,532
 Le gain est significatif, mais les modèles restent trop proches pour être départagés.
 
 18
-00:01:15,777 --> 00:01:19,216
+00:01:13,882 --> 00:01:17,321
 L'application Streamlit donne ensuite les probabilités de chaque match à venir.
 
 19
-00:01:20,566 --> 00:01:23,319
+00:01:18,671 --> 00:01:21,424
 De la collecte web au Machine Learning : un projet complet.
 
 20
-00:01:23,419 --> 00:01:27,893
-Aboubakar Coulibaly recherche un stage et une alternance à partir de septembre 2026.
+00:01:21,524 --> 00:01:24,269
+Aboubakar Coulibaly recherche un stage et une alternance.

@@ -67,7 +67,7 @@ Y_SOUS_TITRES = 935  # tout le contenu des séquences reste au-dessus de cette l
 NOM = "ABOUBAKAR COULIBALY"
 DOMAINES = "Data Science  •  Statistique  •  Machine Learning"
 DOMAINES_FIN = "Data Science | Data Analysis | Modélisation statistique"
-RECHERCHE = "À la recherche d'un stage et d'une alternance à partir de septembre 2026"
+RECHERCHE = "À la recherche d'un stage et d'une alternance"
 
 
 # ------------------------------------------------------------------ narration
@@ -83,10 +83,7 @@ NARRATION = {
          "Exploration et Modélisation Statistique.",
          "Aboubakar Coulibaly, étudiant en B U T 3 Science des Données, parcours "
          "Exploration et Modélisation Statistique."),
-        P("Il recherche un stage et une alternance en Data Science, à partir de "
-         "septembre 2026.",
-         "Il recherche un stage et une alternance en Data Science, à partir de "
-         "septembre deux mille vingt-six."),
+        P("Il recherche un stage et une alternance en Data Science.", None),
     ],
     "02_contexte": [
         P("La Ligue 1 ivoirienne forme des joueurs pour l'Afrique et l'Europe.", None),
@@ -139,10 +136,7 @@ NARRATION = {
     ],
     "06_conclusion": [
         P("De la collecte web au Machine Learning : un projet complet.", None),
-        P("Aboubakar Coulibaly recherche un stage et une alternance à partir de "
-         "septembre 2026.",
-         "Aboubakar Coulibaly recherche un stage et une alternance à partir de "
-         "septembre deux mille vingt-six."),
+        P("Aboubakar Coulibaly recherche un stage et une alternance.", None),
     ],
 }
 DEBUT_VOIX, PAUSE, FIN_MIN = 0.6, 0.25, 0.9  # secondes
@@ -687,7 +681,7 @@ def seq_conclusion(t, duree, reperes, **_):
     h = progression(t, reperes[1] + 0.6)
     if h > 0:
         fr = police(True, 40)
-        msg = "Recherche de stage et d'alternance — Septembre 2026"
+        msg = "Recherche de stage et d'alternance"
         w = d.textlength(msg, font=fr) + 90
         carte_bloc(img, ((L - w) / 2, 605, (L + w) / 2, 689), (224, 112, 0), (224, 112, 0), h,
                    rayon=42)

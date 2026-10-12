@@ -13,7 +13,7 @@ FIGURES = Path(__file__).parent.parent / "docs" / "figures"
 AUTEUR = "ABOUBAKAR COULIBALY"
 ROLE = "Data Science · Analyse de données · Modélisation statistique"
 FORMATION = "Étudiant en BUT 3 Science des Données — Parcours EMS"
-RECHERCHE = "À la recherche d'un stage et d'une alternance à partir de septembre 2026"
+RECHERCHE = "À la recherche d'un stage et d'une alternance"
 LIENS = {"GitHub": "https://github.com/coulibaly-abou",
          "LinkedIn": "https://linkedin.com/in/aboubakar-coulibaly-b028962bb"}
 TITRE_PROJET = "Ligue 1 Côte d'Ivoire — Data Science & Machine Learning"
