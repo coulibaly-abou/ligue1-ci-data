@@ -46,7 +46,7 @@ Avec peu de données, la rigueur de l'évaluation compte plus que la complexité
 🔗 Code et documentation : https://github.com/coulibaly-abou/ligue1-ci-data
 👤 Mes autres projets : https://github.com/coulibaly-abou
 
-🎓 Étudiant en BUT 3 Science des Données (parcours Exploration et Modélisation Statistique), je recherche un stage et une alternance en Data Science, Data Analysis ou Statistique à partir de septembre 2026. Échangeons !
+🎓 Étudiant en BUT 3 Science des Données (parcours Exploration et Modélisation Statistique), je recherche un stage et une alternance en Data Science, Data Analysis ou Statistique. Échangeons !
 
 #DataScience #DataAnalysis #MachineLearning #Statistique #Python #SQL #PyTorch #Streamlit #Football #CôteDIvoire #Alternance #Stage
 
