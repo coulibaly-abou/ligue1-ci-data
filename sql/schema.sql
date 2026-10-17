@@ -84,6 +84,7 @@ CREATE TABLE but (
                                                            'contre_son_camp')),
     buteur         VARCHAR(150),
     passeur        VARCHAR(150),
+    api_joueur_id  INTEGER,                         -- identifiant du buteur chez API-Football
     id_match       INTEGER NOT NULL REFERENCES match (id_match),
     id_club        INTEGER NOT NULL REFERENCES club (id_club),  -- club indiqué par l'API
     id_personne    INTEGER REFERENCES personne (id_personne)
@@ -94,6 +95,7 @@ CREATE TABLE carton (
     minute         SMALLINT CHECK (minute BETWEEN 0 AND 130),
     couleur        VARCHAR(12) NOT NULL CHECK (couleur IN ('jaune', 'rouge', 'jaune_rouge')),
     joueur         VARCHAR(150),
+    api_joueur_id  INTEGER,
     id_match       INTEGER NOT NULL REFERENCES match (id_match),
     id_club        INTEGER NOT NULL REFERENCES club (id_club),
     id_personne    INTEGER REFERENCES personne (id_personne)

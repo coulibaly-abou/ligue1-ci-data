@@ -1,9 +1,9 @@
 {
   "collections": {
     "raw_api": {
-      "documents": 145,
+      "documents": 777,
       "sources": {
-        "api_football": 145
+        "api_football": 777
       }
     },
     "raw_clubs": {
@@ -14,29 +14,29 @@
       }
     },
     "raw_fixtures": {
-      "documents": 334,
+      "documents": 347,
       "sources": {
-        "futbol24": 56,
+        "futbol24": 69,
         "wikipedia": 278
       }
     },
     "raw_matches": {
-      "documents": 2873,
+      "documents": 2893,
       "sources": {
-        "futbol24": 13,
+        "futbol24": 22,
         "rsssf": 1930,
-        "wikipedia": 930
+        "wikipedia": 941
       }
     },
     "raw_pages": {
-      "documents": 711,
+      "documents": 712,
       "sources": {}
     },
     "raw_persons": {
-      "documents": 627,
+      "documents": 628,
       "sources": {
         "wikipedia_en": 412,
-        "wikipedia_fr": 215
+        "wikipedia_fr": 216
       }
     },
     "raw_scorers": {
@@ -60,7 +60,7 @@
       }
     }
   },
-  "derniere_collecte": "2026-10-08T00:40:58.737000",
+  "derniere_collecte": "2026-10-15T06:28:17.490000",
   "villes_geolocalisees": 17,
   "anomalies_etl": {
     "coordonnées absentes": 1,

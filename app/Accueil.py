@@ -5,7 +5,7 @@
 from pathlib import Path
 
 import streamlit as st
-from commun import AUTEUR, CSS, FORMATION, ORANGE, PAGES, RECHERCHE, liens_html
+from commun import AUTEUR, CSS, FORMATION, ORANGE, PAGES, RECHERCHE, SECTIONS, liens_html
 
 st.set_page_config(page_title="Ligue 1 Côte d'Ivoire — Data Science · Aboubakar Coulibaly",
                    page_icon=str(Path(__file__).parent / "icone.png"), layout="wide")
@@ -20,10 +20,16 @@ with st.sidebar:
                 f"<span style='color:{ORANGE}'>Machine Learning</span></div></div>",
                 unsafe_allow_html=True)
 
-# Chemins relatifs au dossier de ce fichier (règle de st.Page)
-navigation = st.navigation([
-    st.Page(chemin, title=titre, icon=icone, default=(i == 0),
-            url_path=None if i == 0 else Path(chemin).stem)
-    for i, (chemin, (titre, icone)) in enumerate(PAGES.items())
-])
+# Chemins relatifs au dossier de ce fichier (règle de st.Page) ; pages groupées par section
+ACCUEIL = next(iter(PAGES))
+
+
+def page(chemin: str) -> st.Page:
+    titre, icone = PAGES[chemin]
+    return st.Page(chemin, title=titre, icon=icone, default=chemin == ACCUEIL,
+                   url_path=None if chemin == ACCUEIL else Path(chemin).stem)
+
+
+navigation = st.navigation({section: [page(c) for c in chemins]
+                            for section, chemins in SECTIONS.items()}, position="top")
 navigation.run()

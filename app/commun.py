@@ -1,10 +1,12 @@
 """Fonctions partagées par les pages : chargement des données, couleurs, mise en forme."""
+import hashlib
 import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.io as pio
 import streamlit as st
 
 DATA = Path(__file__).parent / "data"
@@ -33,11 +35,32 @@ PAGES = {  # chemin -> (titre, icône Material) ; partagé par la navigation et 
     "vues/accueil.py": ("Accueil", ":material/home:"),
     "vues/championnat.py": ("Championnat", ":material/emoji_events:"),
     "vues/club.py": ("Clubs", ":material/shield:"),
+    "vues/attaque_defense.py": ("Attaque & Défense", ":material/swords:"),
+    "vues/matchs.py": ("Matchs", ":material/scoreboard:"),
+    "vues/joueurs.py": ("Joueurs", ":material/person:"),
     "vues/reseau.py": ("Réseau", ":material/hub:"),
     "vues/prediction.py": ("Prédiction", ":material/online_prediction:"),
     "vues/modeles.py": ("Modèles", ":material/model_training:"),
     "vues/methodologie.py": ("Données & Méthodologie", ":material/database:"),
 }
+SECTIONS = {  # regroupement des pages dans la barre de navigation
+    "": ["vues/accueil.py"],
+    "Explorer": ["vues/championnat.py", "vues/club.py", "vues/attaque_defense.py",
+                 "vues/matchs.py", "vues/joueurs.py"],
+    "Analyser": ["vues/reseau.py", "vues/prediction.py", "vues/modeles.py"],
+    "Projet": ["vues/methodologie.py"],
+}
+SAISONS_EVENEMENTS = "2022-23 → 2024-25"  # saisons couvertes par les évènements API-Football
+
+# Thème Plotly commun : même police, mêmes survols, fonds transparents
+pio.templates["ligue1"] = go.layout.Template(layout={
+    "font": {"family": "Source Sans Pro, sans-serif", "color": "#1F2328", "size": 13},
+    "colorway": [ORANGE, VERT, "#2A78D6", "#7A4FB0", ROUGE, GRIS, "#C98500", "#1BAF7A"],
+    "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)",
+    "hoverlabel": {"bgcolor": "white", "bordercolor": LIGNE, "font": {"size": 13}},
+    "xaxis": {"gridcolor": "#EEF0F2", "zerolinecolor": LIGNE},
+    "yaxis": {"gridcolor": "#EEF0F2", "zerolinecolor": LIGNE}})
+pio.templates.default = "plotly_white+ligue1"
 
 CSS = f"""<style>
 .block-container {{padding-top: 1.6rem; max-width: 1320px;}}
@@ -90,6 +113,45 @@ h1, h2, h3 {{color: {ENCRE}; letter-spacing: -0.01em;}}
 .question {{border-left:5px solid {ORANGE}; background:#FBF8F4; border-radius:12px;
            padding:18px 22px; font-size:1.18rem; font-weight:650; color:{ENCRE};
            line-height:1.45; margin:.4rem 0 1rem;}}
+/* Composants des pages Explorer : cartes survolables, pastilles de club, affiche */
+.carte {{border:1px solid {LIGNE}; border-radius:14px; padding:16px 18px; background:#FFFFFF;
+        transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+        height:100%;}}
+.carte:hover {{box-shadow:0 8px 24px rgba(20,33,27,.10); transform:translateY(-2px);
+              border-color:#F2C9A0;}}
+.carte .lib {{font-size:.76rem; font-weight:700; letter-spacing:.12em; color:{ENCRE_2};
+             text-transform:uppercase;}}
+.carte .val {{font-size:1.9rem; font-weight:800; color:{ENCRE}; line-height:1.15;
+             font-variant-numeric:tabular-nums;}}
+.carte .det {{font-size:.86rem; color:{ENCRE_2};}}
+.pastille {{display:inline-flex; align-items:center; justify-content:center;
+           border-radius:50%; color:#FFFFFF; font-weight:800; letter-spacing:.02em;
+           flex-shrink:0;}}
+.club-ligne {{display:inline-flex; align-items:center; gap:.55rem;}}
+.affiche {{border-radius:18px; padding:26px 30px; color:#FFFFFF; margin-bottom:1rem;
+          background: radial-gradient(circle at 85% 20%, rgba(224,112,0,.22), transparent 45%),
+                      linear-gradient(135deg, #0E2A1E 0%, #14211B 60%, #1B2621 100%);}}
+.affiche .meta {{color:#C8D3CD; font-size:.88rem; letter-spacing:.06em; text-align:center;}}
+.affiche .ligne {{display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+                 gap:1rem; margin-top:.8rem;}}
+.affiche .equipe {{display:flex; flex-direction:column; align-items:center; gap:.5rem;
+                  font-weight:700; font-size:1.1rem; text-align:center;}}
+.affiche .score {{font-size:3rem; font-weight:800; letter-spacing:.06em;
+                 font-variant-numeric:tabular-nums;}}
+.affiche .issue {{text-align:center; color:#F5A04A; font-weight:600; margin-top:.4rem;}}
+.note {{display:inline-flex; align-items:center; justify-content:center; border-radius:12px;
+       font-weight:800; color:#FFFFFF; font-variant-numeric:tabular-nums;}}
+.fiche {{display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap;}}
+.fiche .nom {{font-size:1.7rem; font-weight:800; color:{ENCRE}; line-height:1.1;}}
+.fiche .sous {{color:{ENCRE_2}; font-size:.95rem; margin-top:.3rem;}}
+.puce {{display:inline-block; padding:.15rem .6rem; border-radius:999px; font-size:.8rem;
+       font-weight:600; background:#F4F6F4; color:{ENCRE}; margin:.25rem .25rem 0 0;}}
+.chrono {{display:grid; grid-template-columns:1fr 4.2rem 1fr; gap:.35rem .6rem;
+         align-items:center; font-size:.95rem;}}
+.chrono .min {{text-align:center; font-weight:700; color:{ENCRE_2};
+              font-variant-numeric:tabular-nums;}}
+.chrono .dom {{text-align:right;}}
+.chrono .sc {{font-size:.8rem; color:{ENCRE_2};}}
 /* Téléphones : bannière et cartes plus compactes */
 @media (max-width: 640px) {{
   .block-container {{padding-left:1rem; padding-right:1rem;}}
@@ -100,6 +162,10 @@ h1, h2, h3 {{color: {ENCRE}; letter-spacing: -0.01em;}}
   .carte-axe {{min-height:0; margin-bottom:.6rem;}}
   .kpi {{margin-bottom:.6rem;}}
   .kpi .val {{font-size:1.7rem;}}
+  .affiche {{padding:20px 14px;}}
+  .affiche .score {{font-size:2.1rem;}}
+  .affiche .equipe {{font-size:.95rem;}}
+  .carte {{margin-bottom:.6rem;}}
 }}
 </style>"""
 
@@ -160,6 +226,65 @@ def pied_de_page() -> None:
     st.markdown(f"<div class='pied'><span><b>{AUTEUR}</b> · {FORMATION} · "
                 f"{liens_html()}</span><span>{TITRE_PROJET}</span><span>{SOURCES}</span></div>",
                 unsafe_allow_html=True)
+
+
+def nombre(x: float, decimales: int = 2) -> str:
+    """Nombre au format français (virgule décimale)."""
+    return f"{x:.{decimales}f}".replace(".", ",")
+
+
+def couleur_club(club: str) -> str:
+    """Couleur stable par club (teintes sombres : texte blanc lisible)."""
+    teintes = ["#0E5A3C", "#B35900", "#1F5FA8", "#6B3FA0", "#9E2B25", "#2D6F73",
+               "#8A6A00", "#3E4A55", "#A23D78", "#46632B"]
+    return teintes[int(hashlib.md5(club.encode()).hexdigest(), 16) % len(teintes)]
+
+
+def initiales(nom: str) -> str:
+    sigles = {"FC", "AS", "SC", "AC", "SO", "ES", "CO", "OFC", "SOL", "LYS"}
+    mots = [m for m in nom.replace("'", " ").replace("-", " ").split()
+            if m.upper() not in sigles and len(m) > 1]
+    return "".join(m[0] for m in mots[:2]).upper() or nom[:2].upper()
+
+
+def pastille(nom: str, taille: int = 34) -> str:
+    """Pastille ronde aux initiales du club (les logos des clubs ne sont pas réutilisables)."""
+    return (f"<span class='pastille' style='width:{taille}px;height:{taille}px;"
+            f"font-size:{taille * .36:.0f}px;background:{couleur_club(nom)}'>"
+            f"{initiales(nom)}</span>")
+
+
+def club_html(nom: str, taille: int = 28) -> str:
+    return f"<span class='club-ligne'>{pastille(nom, taille)}<span>{nom}</span></span>"
+
+
+def couleur_note(note: float) -> str:
+    return VERT if note >= 7 else ORANGE if note >= 5 else GRIS
+
+
+def note_html(note: float, taille: int = 46) -> str:
+    return (f"<span class='note' style='width:{taille}px;height:{taille}px;"
+            f"font-size:{taille * .38:.0f}px;background:{couleur_note(note)}'>"
+            f"{nombre(note, 1)}</span>")
+
+
+def cartes(elements: list[tuple[str, str, str]]) -> None:
+    """Rangée de cartes survolables : (libellé, valeur, détail)."""
+    for col, (lib, val, det) in zip(st.columns(len(elements)), elements, strict=True):
+        col.markdown(f"<div class='carte'><div class='lib'>{lib}</div><div class='val'>{val}"
+                     f"</div><div class='det'>{det}</div></div>", unsafe_allow_html=True)
+
+
+def parametre(nom: str, valeurs: list, defaut=None):
+    """Valeur passée dans l'URL (?nom=...) si elle fait partie des choix, sinon le défaut.
+
+    Sert aux liens entre pages : une fiche match, joueur ou club a sa propre adresse.
+    """
+    demande = st.query_params.get(nom)
+    for v in valeurs:
+        if str(v) == demande:
+            return v
+    return defaut if defaut is not None else (valeurs[0] if len(valeurs) else None)
 
 
 def serie_html(issues: list[str]) -> str:

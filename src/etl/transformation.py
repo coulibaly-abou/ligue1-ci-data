@@ -260,12 +260,13 @@ def construire_but_et_carton(ctx: Contexte, matchs: pd.DataFrame):
             if e["type"] == "Goal" and e["detail"] in types_but:
                 buts.append({"id_but": len(buts) + 1, "minute": minute,
                              "type_but": types_but[e["detail"]], "buteur": e["player"]["name"],
-                             "passeur": e["assist"]["name"], "id_match": id_match,
+                             "passeur": e["assist"]["name"],
+                             "api_joueur_id": e["player"]["id"], "id_match": id_match,
                              "id_club": club, "id_personne": None})
             elif e["type"] == "Card" and e["detail"] in couleurs:
                 cartons.append({"id_carton": len(cartons) + 1, "minute": minute,
                                 "couleur": couleurs[e["detail"]], "joueur": e["player"]["name"],
-                                "id_match": id_match, "id_club": club, "id_personne": None})
+                                "api_joueur_id": e["player"]["id"], "id_match": id_match, "id_club": club, "id_personne": None})
     return pd.DataFrame(buts), pd.DataFrame(cartons)
 
 

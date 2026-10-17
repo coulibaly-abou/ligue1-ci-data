@@ -21,8 +21,8 @@ mais calculé à partir du score, etc.).
 | **SAISON** | id_saison | libellé, année_début, année_fin, nb_clubs, format, statut |
 | **MATCH** | id_match | phase, journée, date_match, buts_dom, buts_ext, statut, arbitre, note, source, api_fixture_id |
 | **PERSONNE** | id_personne | nom, nom_complet, date_naissance, nationalité, poste, est_joueur, est_entraîneur, url_wikipédia, api_id |
-| **BUT** | id_but | minute, type_but, buteur, passeur |
-| **CARTON** | id_carton | minute, couleur, joueur |
+| **BUT** | id_but | minute, type_but, buteur, passeur, api_joueur_id |
+| **CARTON** | id_carton | minute, couleur, joueur, api_joueur_id |
 | **CLASSEMENT** | id_classement | phase, groupe, type_tableau, rang, joués, gagnés, nuls, perdus, buts_pour, buts_contre, points, mention, source |
 | **PASSAGE** | id_passage | rôle, année_début, année_fin, prêt, matchs, buts, club_brut, source |
 | **TRANSFERT** | id_transfert | joueur, date_transfert, type_transfert, source |
@@ -123,8 +123,8 @@ du côté de la cardinalité maximale 1.
   est_joueur, est_entraineur, url_wikipedia, api_id)
 - **match** (**id_match**, phase, journee, date_match, buts_dom, buts_ext, statut,
   arbitre, note, source, api_fixture_id, #id_saison, #id_club_dom, #id_club_ext, #id_stade)
-- **but** (**id_but**, minute, type_but, buteur, passeur, #id_match, #id_club, #id_personne)
-- **carton** (**id_carton**, minute, couleur, joueur, #id_match, #id_club, #id_personne)
+- **but** (**id_but**, minute, type_but, buteur, passeur, api_joueur_id, #id_match, #id_club, #id_personne)
+- **carton** (**id_carton**, minute, couleur, joueur, api_joueur_id, #id_match, #id_club, #id_personne)
 - **classement** (**id_classement**, phase, groupe, type_tableau, rang, joues, gagnes,
   nuls, perdus, buts_pour, buts_contre, points, mention, source, #id_saison, #id_club)
 - **passage** (**id_passage**, role, annee_debut, annee_fin, pret, matchs, buts,
