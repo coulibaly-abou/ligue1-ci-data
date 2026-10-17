@@ -5,7 +5,7 @@
 from pathlib import Path
 
 import streamlit as st
-from commun import AUTEUR, CSS, FORMATION, ORANGE, PAGES, RECHERCHE, SECTIONS, liens_html
+from commun import AUTEUR, CSS, FORMATION, ORANGE, PAGES, RECHERCHE, SECTIONS, charger, liens_html
 
 st.set_page_config(page_title="Ligue 1 Côte d'Ivoire — Data Science · Aboubakar Coulibaly",
                    page_icon=str(Path(__file__).parent / "icone.png"), layout="wide")
@@ -32,4 +32,29 @@ def page(chemin: str) -> st.Page:
 
 navigation = st.navigation({section: [page(c) for c in chemins]
                             for section, chemins in SECTIONS.items()}, position="top")
+
+# Recherche globale : un club ou un joueur, sur toutes les pages
+with st.sidebar:
+    requete = st.text_input("Rechercher", placeholder="Joueur ou club", key="recherche",
+                            icon=":material/search:").strip().lower()
+    if len(requete) >= 2:
+        clubs = [c for c in charger("clubs")["club"] if requete in c.lower()]
+        joueurs = charger("joueurs")
+        trouves = joueurs[joueurs["nom"].str.lower().str.contains(requete, regex=False)
+                          | joueurs["nom_complet"].fillna("").str.lower()
+                          .str.contains(requete, regex=False)]
+        trouves = trouves.sort_values("saison").groupby("joueur").tail(1) \
+            .sort_values("note", ascending=False)
+        for c in clubs[:5]:
+            st.page_link("vues/club.py", label=c, icon=":material/shield:",
+                         query_params={"club": c})
+        for j in trouves.head(8).itertuples():
+            st.page_link("vues/joueurs.py", label=f"{j.nom} · {j.club} ({j.saison[:4]})",
+                         icon=":material/person:",
+                         query_params={"saison": j.saison, "joueur": j.joueur})
+        if not clubs and trouves.empty:
+            st.caption("Aucun club ni joueur ne correspond.")
+        elif len(trouves) > 8:
+            st.caption(f"{len(trouves) - 8} autre(s) joueur(s) : préciser la recherche.")
+
 navigation.run()

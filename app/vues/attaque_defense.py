@@ -17,6 +17,7 @@ from commun import (
     pied_de_page,
     section,
 )
+from indicateurs import LIEUX, filtrer_resultats
 
 configurer()
 entete("Attaque & Défense", "Comment chaque club marque et encaisse : efficacité offensive, "
@@ -26,11 +27,17 @@ resultats = charger("resultats_club")
 buts = charger("buts_match")
 matchs = charger("matchs").set_index("id_match")
 
+lieu = st.segmented_control("Lieu des matchs", LIEUX, default="Tous", key="ad_lieu") or "Tous"
+resultats = filtrer_resultats(resultats, lieu=lieu)
 par_saison = resultats.groupby(["saison", "club"]).agg(
     matchs=("bp", "size"), bp=("bp", "mean"), bc=("bc", "mean"), points=("points", "mean"),
     clean_sheets=("bc", lambda s: (s == 0).mean()),
     sans_marquer=("bp", lambda s: (s == 0).mean())).reset_index()
-par_saison = par_saison[par_saison["matchs"] >= 5]
+par_saison = par_saison[par_saison["matchs"] >= 5]  # moins de 5 matchs : pas de moyenne
+st.caption(("Tous les matchs" if lieu == "Tous" else f"Matchs à {lieu.lower()} seulement"
+            .replace("à extérieur", "à l'extérieur"))
+           + " · clubs avec au moins 5 matchs dans la sélection. Tirs, tirs cadrés et "
+           "expected goals (xG) : non publiés pour ce championnat, donc absents (et non nuls).")
 
 saisons = sorted(par_saison["saison"].unique(), reverse=True)
 saison = st.selectbox("Saison", saisons,
@@ -133,7 +140,8 @@ section("Minute par minute", "À quel moment le club marque et encaisse",
         f"Matchs dont le déroulé est publié (saisons {SAISONS_EVENEMENTS}).")
 tranches = ["0-15", "16-30", "31-45+", "46-60", "61-75", "76-90+"]
 b = buts.dropna(subset=["minute"]).join(matchs[["dom", "ext"]], on="id_match")
-b = b[(b["dom"] == club) | (b["ext"] == club)]
+b = b[(b["dom"] == club) | (b["ext"] == club)] if lieu == "Tous" else \
+    b[b["dom" if lieu == "Domicile" else "ext"] == club]
 saisons_ev = sorted(b["saison"].unique())
 if not saisons_ev:
     st.info(f"Pas de déroulé publié pour {club} sur les saisons {SAISONS_EVENEMENTS}.")

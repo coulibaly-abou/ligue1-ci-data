@@ -62,10 +62,28 @@ Chaque document garde sa `source` : quand deux sources donnent la même informat
 | fif.ci (fédération) | HTTP 521 | Hors ligne |
 | news.abidjan.net (presse) | Scores et classements en texte libre, buteurs rarement | Format trop irrégulier pour une collecte fiable |
 
+### API Sportmonks (évaluée le 17/10/2026)
+
+Sportmonks alimente le projet LinkedIn de référence (LOSC). D'après sa documentation
+(docs.sportmonks.com/v3) : l'offre gratuite couvre **deux championnats fixes, la Superliga
+danoise et la Premiership écossaise** (non modifiables), avec 3 000 appels par heure et par
+entité. La Ligue 1 ivoirienne n'y figure pas ; sa présence dans une offre payante n'a pas pu
+être confirmée (outil « Coverage Finder » à consulter, accès selon l'abonnement). Aucun
+jeton n'est configuré. **Décision** : pas de collecteur Sportmonks ; si une offre couvrant
+ce championnat est souscrite, ajouter `SPORTMONKS_TOKEN` dans `.env` et un module
+`src/collecte/scrapers/sportmonks.py` sur le modèle d'`api_football.py` (cache MongoDB,
+quota, reprise).
+
 ## Ce qui reste non couvert
 
-- **Buteurs et cartons match par match** : aucune source légale et exploitable.
-  `fact_but` se limitera aux totaux par joueur et par saison (top 5-10).
+- **Buteurs et cartons match par match** : seulement 2022-23 → 2024-25, via API-Football
+  (offre gratuite : saisons 2022 à 2024, 100 requêtes par jour, reprise automatique).
+  988 buts et 52 cartons rouges chargés ; 81 %, 68 % et 45 % des buts de ces saisons ont un
+  déroulé publié. Avant 2022 : totaux par joueur et par saison (top 5-10) seulement.
+- **Compositions, remplacements, statistiques d'équipe (possession, tirs, corners), temps
+  de jeu, passes décisives, coordonnées des évènements** : non publiés par API-Football
+  pour ce championnat (couverture vérifiée : `python -m src.collecte.scrapers.api_football`).
+  L'application affiche « Non publié », jamais 0.
 - **Effectifs complets par saison** : `raw_persons` ne contient que les joueurs qui ont
   un article Wikipédia (surtout ASEC, Africa Sports, joueurs partis à l'étranger).
   Le graphe Neo4j sera donc **biaisé vers les grands clubs** : à mentionner dans le rapport.
