@@ -13,6 +13,7 @@ import yaml
 
 from config.settings import FICHIER_ALIAS, RACINE
 from src.graphe import analyses as graphe
+from src.restitution import joueurs
 from src.stockage.postgres_client import lire
 from src.utils.logs import get_logger
 
@@ -60,6 +61,23 @@ REQUETES = {
         LEFT JOIN ligue1.club k USING (id_club)
         ORDER BY b.id_saison, b.joueur, b.buts DESC""",
 }
+# Évènements API-Football (saisons 2022-23 -> 2024-25) : déroulé des matchs et joueurs
+SQL_BUTS = """
+    SELECT b.id_match, s.libelle AS saison, b.minute, b.type_but, b.buteur, b.api_joueur_id,
+           k.nom AS club
+    FROM ligue1.but b
+    JOIN ligue1.match m USING (id_match)
+    JOIN ligue1.saison s USING (id_saison)
+    JOIN ligue1.club k ON k.id_club = b.id_club"""
+SQL_CARTONS = """
+    SELECT c.id_match, s.libelle AS saison, c.minute, c.couleur, c.joueur, c.api_joueur_id,
+           k.nom AS club
+    FROM ligue1.carton c
+    JOIN ligue1.match m USING (id_match)
+    JOIN ligue1.saison s USING (id_saison)
+    JOIN ligue1.club k ON k.id_club = c.id_club"""
+POSTES = {"Goalkeeper": "Gardien", "Defender": "Défenseur", "Midfielder": "Milieu",
+          "Attacker": "Attaquant", "Forward": "Attaquant"}
 FICHIERS_SQL = {"palmares": "08_palmares.sql", "series": "04_series_invincibilite.sql",
                 "scores": "07_scores_frequents.sql",
                 "resultats_saison": "06_resultats_par_saison.sql"}
@@ -91,6 +109,45 @@ def exporter_reseau() -> None:
     _sauver(mvts, "reseau_mouvements")
     _sauver(noeuds, "reseau_noeuds")
     _sauver(aretes, "reseau_aretes")
+
+
+def _effectifs_api() -> pd.DataFrame:
+    """Effectifs API-Football par club et par saison, avec le profil de chaque joueur."""
+    from src.stockage.mongo_client import get_db
+
+    clubs = lire("SELECT api_id, nom FROM ligue1.club WHERE api_id IS NOT NULL")
+    club_api = dict(zip(clubs["api_id"], clubs["nom"], strict=True))
+    lignes = []
+    for doc in get_db().raw_api.find({"endpoint": "/players"}, {"params": 1, "reponse": 1}):
+        saison = f"{doc['params']['season']}-{doc['params']['season'] + 1}"
+        for p in doc["reponse"]["response"]:
+            j = p["player"]
+            lignes.append({"saison": saison, "club": club_api.get(doc["params"]["team"]),
+                           "api_joueur_id": j["id"], "prenom": j["firstname"],
+                           "nom_famille": j["lastname"], "nom_complet":
+                           f"{j['firstname'] or ''} {j['lastname'] or ''}".strip() or j["name"],
+                           "naissance": j["birth"]["date"], "nationalite": j["nationality"],
+                           "poste": POSTES.get(p["statistics"][0]["games"]["position"])})
+    return pd.DataFrame(lignes)
+
+
+def exporter_joueurs(matchs: pd.DataFrame, resultats_club: pd.DataFrame) -> None:
+    buts = joueurs.derouler_buts(lire(SQL_BUTS), matchs).drop(columns=["buts_dom", "buts_ext",
+                                                                       "dom", "ext"])
+    buts["joueur"] = [joueurs.cle_joueur(a, n, c) if pd.notna(n) else None for a, n, c in
+                      zip(buts["api_joueur_id"], buts["buteur"], buts["club"], strict=True)]
+    cartons = lire(SQL_CARTONS)
+    club_saison = resultats_club.groupby(["saison", "club"], as_index=False)["bp"].sum()
+    notes = joueurs.notes_joueurs(buts, cartons, club_saison)
+    effectifs = _effectifs_api()
+    notes["api_joueur_id"] = notes["joueur"].str.extract(r"^api(\d+)$")[0].astype("Int64")
+    notes["api_joueur_id"] = notes["api_joueur_id"].fillna(
+        joueurs.rapprocher_profils(notes, effectifs))
+    profils = effectifs.drop(columns=["saison", "club", "prenom", "nom_famille"])         .drop_duplicates("api_joueur_id")
+    notes = notes.merge(profils, on="api_joueur_id", how="left")
+    _sauver(buts, "buts_match")
+    _sauver(cartons, "cartons")
+    _sauver(notes, "joueurs")
 
 
 def exporter_modele() -> None:
@@ -140,6 +197,8 @@ def main() -> None:
     DOSSIER.mkdir(parents=True, exist_ok=True)
     exporter_sources()
     exporter_bases()
+    exporter_joueurs(pd.read_parquet(DOSSIER / "matchs.parquet"),
+                     pd.read_parquet(DOSSIER / "resultats_club.parquet"))
     exporter_reseau()
     exporter_modele()
 

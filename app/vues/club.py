@@ -11,6 +11,8 @@ from commun import (
     configurer,
     entete,
     kpis,
+    note_html,
+    parametre,
     pied_de_page,
     section,
     serie_html,
@@ -29,8 +31,10 @@ palmares = charger("palmares")
 saison_actuelle = resultats["saison"].max()
 actuels = sorted(resultats.loc[resultats["saison"] == saison_actuelle, "club"].unique())
 autres = sorted(set(resultats["club"]) - set(actuels))
-club = st.selectbox("Club", actuels + autres,
-                    index=actuels.index("ASEC Mimosas") if "ASEC Mimosas" in actuels else 0)
+choix = actuels + autres
+club = st.selectbox("Club", choix, index=choix.index(parametre(
+    "club", choix, "ASEC Mimosas" if "ASEC Mimosas" in choix else choix[0])))
+st.query_params["club"] = club
 r = resultats[resultats["club"] == club].sort_values("date_match")
 
 info = clubs_info.loc[club] if club in clubs_info.index else None
@@ -116,14 +120,32 @@ fig.update_layout(barmode="group", height=320, margin={"l": 0, "r": 0, "t": 10, 
                   legend={"orientation": "h", "y": 1.1})
 st.plotly_chart(fig, width="stretch")
 
-section("Buteurs", "Meilleurs buteurs du club")
+section("Joueurs", "Les meilleurs joueurs offensifs du club",
+        "Note de contribution offensive sur 10 (saisons 2022-23 → 2024-25) : "
+        "cliquer sur un joueur pour ouvrir sa fiche.")
+notes = charger("joueurs")
+notes = notes[notes["club"] == club].sort_values("note", ascending=False).head(8)
+if len(notes):
+    cols = st.columns(4)
+    for i, j in enumerate(notes.itertuples()):
+        with cols[i % 4].container(border=True):
+            st.markdown(f"<div style='display:flex;justify-content:space-between;"
+                        f"align-items:center;gap:.5rem'><div><b>{j.nom}</b><br>"
+                        f"<span style='color:#57606A;font-size:.85rem'>{j.saison} · {j.buts} "
+                        f"buts</span></div>{note_html(j.note, 40)}</div>",
+                        unsafe_allow_html=True)
+            st.page_link("vues/joueurs.py", label="Fiche", icon=":material/arrow_forward:",
+                         query_params={"saison": j.saison, "joueur": j.joueur})
+else:
+    st.info("Aucun buteur de ce club dans les déroulés publiés (2022-23 → 2024-25).")
+st.page_link("vues/attaque_defense.py", label=f"Attaque et défense de {club} en détail",
+             icon=":material/swords:", query_params={"club": club})
+st.page_link("vues/matchs.py", label=f"Tous les matchs de {club}",
+             icon=":material/scoreboard:")
+
 b = buteurs[buteurs["club"] == club].sort_values(["saison", "buts"], ascending=[False, False])
 if len(b):
-    st.dataframe(b[["saison", "joueur", "buts", "source"]]
-                 .rename(columns=str.capitalize), hide_index=True,
-                 width="stretch")
-else:
-    st.info("Aucun buteur de ce club dans les tops publiés (Wikipédia, API-Football).")
-st.caption("Les sources publient seulement le top 5-10 des buteurs par saison : "
-           "les buts match par match ne sont pas disponibles légalement.")
+    with st.expander("Meilleurs buteurs publiés (Wikipédia, API-Football), depuis 2016"):
+        st.dataframe(b[["saison", "joueur", "buts", "source"]]
+                     .rename(columns=str.capitalize), hide_index=True, width="stretch")
 pied_de_page()

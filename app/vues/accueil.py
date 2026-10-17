@@ -88,7 +88,7 @@ axes = [
     ("Prédiction des matchs", "Probabilités victoire / nul / défaite avant le match."),
     ("Comparaison des modèles", "Six modèles évalués en validation temporelle."),
     ("Variables importantes", "Ce qui pèse vraiment dans la prédiction."),
-    ("Application interactive", "Résultats consultables et explorables en ligne."),
+    ("Joueurs et matchs", "Fiches joueurs notées sur 10, déroulé minute par minute."),
 ]
 for debut in (0, 4):
     rangee = enumerate(axes[debut:debut + 4], start=debut + 1)
@@ -181,6 +181,9 @@ section("Explorer l'étude", "Les pages de l'application")
 descriptions = {
     "vues/championnat.py": "Classements, évolution par journée, palmarès, avantage du terrain.",
     "vues/club.py": "Bilan d'un club : résultats, buts, rang, forme récente.",
+    "vues/attaque_defense.py": "Attaque contre défense, domicile / extérieur, minute par minute.",
+    "vues/matchs.py": "Fiche de chaque match : déroulé, contexte, face-à-face.",
+    "vues/joueurs.py": "Classement et fiches des buteurs, note de contribution sur 10.",
     "vues/reseau.py": "Mouvements de joueurs, clubs centraux, communautés.",
     "vues/prediction.py": "Probabilités des prochains matchs et simulateur d'affiche.",
     "vues/modeles.py": "Comparaison des six modèles, calibration, variables importantes.",

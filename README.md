@@ -107,7 +107,16 @@ Journal : `logs/collecte_quotidienne.log` et `logs/pipeline.log`.
 
 ## Tableau de bord et déploiement
 
-`app/` (Streamlit, 7 pages : Accueil, Championnat, Clubs, Réseau, Prédiction, Modèles, Données & Méthodologie) ne lit
+- **Matchs** : fiche de chaque match (adresse partageable `?match=`), déroulé minute par
+  minute et écart au score, rang et forme avant le match, face-à-face.
+- **Joueurs** : classement et fiche de chaque buteur 2022-23 → 2024-25, avec une note de
+  contribution offensive sur 10 (buts, buts décisifs, poids dans l'attaque, régularité ;
+  formule dans [src/restitution/joueurs.py](src/restitution/joueurs.py)). API-Football ne
+  publie ni temps de jeu ni passes pour ce championnat : la note ne couvre que les buteurs.
+- **Attaque & Défense** : buts marqués / encaissés par club, domicile / extérieur, par
+  quart d'heure.
+
+`app/` (Streamlit, 10 pages : Accueil ; Explorer : Championnat, Clubs, Attaque & Défense, Matchs, Joueurs ; Analyser : Réseau, Prédiction, Modèles ; Données & Méthodologie) ne lit
 que `app/data/*.parquet` : il se déploie sans base de données.
 
 1. Pousser le dépôt sur GitHub (avec `app/data/`).
