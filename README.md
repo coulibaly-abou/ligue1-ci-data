@@ -53,7 +53,21 @@ Détails : page **Modèles** du tableau de bord, [notebooks/02_modelisation.ipyn
 
 ![Modèles](docs/figures/06_comparaison_modeles.png)
 
-## Installation
+## Démarrage rapide (sans base de données ni clé API)
+
+Le tableau de bord ne lit que les données réelles exportées dans `app/data/` (versionnées) :
+
+```bash
+pip install -r app/requirements.txt
+streamlit run app/Accueil.py        # http://localhost:8501
+```
+
+| | |
+|---|---|
+| ![Tableau de bord club](docs/captures/Club.png) | ![Fiche joueur](docs/captures/joueurs.png) |
+| ![Fiche match](docs/captures/matchs.png) | ![Attaque et défense](docs/captures/attaque_defense.png) |
+
+## Installation complète (collecte, bases, modèles)
 
 ```bash
 cp .env.example .env
@@ -107,12 +121,26 @@ Journal : `logs/collecte_quotidienne.log` et `logs/pipeline.log`.
 
 ## Tableau de bord et déploiement
 
-- **Matchs** : fiche de chaque match (adresse partageable `?match=`), déroulé minute par
-  minute et écart au score, rang et forme avant le match, face-à-face.
+Inspiré d'un tableau de bord du LOSC présenté sur LinkedIn (API Sportmonks), adapté à toute
+la Ligue 1 ivoirienne avec des sources gratuites. Correspondance fonctionnalité par
+fonctionnalité, preuves et limites : [docs/specifications.md](docs/specifications.md).
+Définition, dénominateur et limites de chaque indicateur :
+[docs/indicateurs.md](docs/indicateurs.md).
+
+- **Clubs** : tableau de bord d'un club. Bilan, points, classement, différence de buts,
+  moyennes, forme et tendance, prochains matchs avec probabilités, course aux points,
+  bilan par adversaire. Filtres saison, domicile / extérieur et période, avec remise à zéro.
+- **Recherche** : un joueur ou un club depuis n'importe quelle page (barre latérale).
+
+- **Matchs** : fiche de chaque match (adresse partageable `?match=`), match précédent /
+  suivant, déroulé minute par minute et écart au score, statistiques (les données non
+  publiées sont marquées « Non publié », jamais 0), rang et forme avant le match, face-à-face.
 - **Joueurs** : classement et fiche de chaque buteur 2022-23 → 2024-25, avec une note de
   contribution offensive sur 10 (buts, buts décisifs, poids dans l'attaque, régularité ;
-  formule dans [src/restitution/joueurs.py](src/restitution/joueurs.py)). API-Football ne
-  publie ni temps de jeu ni passes pour ce championnat : la note ne couvre que les buteurs.
+  formule dans [src/restitution/joueurs.py](src/restitution/joueurs.py)), décomposée critère
+  par critère. Filtres club, poste et notes fiables (≥ 3 buts), comparaison de deux joueurs.
+  API-Football ne publie ni temps de jeu ni passes pour ce championnat : la note ne couvre
+  que les buteurs et n'est pas une note officielle.
 - **Attaque & Défense** : buts marqués / encaissés par club, domicile / extérieur, par
   quart d'heure.
 
@@ -126,11 +154,40 @@ que `app/data/*.parquet` : il se déploie sans base de données.
 3. Après chaque mise à jour des données : `make pipeline` puis commit de `app/data/` ;
    l'application se met à jour toute seule.
 
+### Variables d'environnement (`.env`, à créer depuis `.env.example`)
+
+| Variable | Rôle | Nécessaire pour |
+|---|---|---|
+| `MONGO_URI`, `MONGO_DB` | zone brute MongoDB | collecte, ETL, export |
+| `PG_URL` (et `PG_PASSWORD` pour Docker) | base analytique PostgreSQL | ETL, modèles, export |
+| `API_FOOTBALL_KEY` | clé gratuite api-sports.io (100 requêtes / jour) | collecte des matchs 2022-2024, évènements, effectifs |
+| `USER_AGENT`, `DELAI_REQUETES` | identification et politesse du scraping | collecte |
+| `NEO4J_*` | graphe (optionnel, non utilisé par le tableau de bord) | — |
+
+Aucune variable n'est nécessaire pour lancer le tableau de bord. `.env` est ignoré par git.
+
+### Actualiser les données
+
+```bash
+make collect && make etl && make export   # puis commit de app/data/
+```
+
+Sportmonks (API de la référence) a été évaluée : son offre gratuite ne couvre que les
+championnats danois et écossais (détails dans [docs/sources.md](docs/sources.md)).
+
+### Tests
+
+`make test` : 108 tests, dont les calculs du tableau de bord (bilans, points, classements,
+filtres, navigation entre matchs), la note des joueurs et l'exécution des 10 pages avec les
+interactions (filtres, boutons, recherche) via `streamlit.testing`. Ces derniers sont sautés
+en CI, où Streamlit n'est pas installé.
+
 ## Limites
 
 - ≈ 240 matchs par saison : les écarts entre modèles sont du même ordre que l'incertitude
   d'une saison.
-- Aucune source légale ne publie les buteurs et cartons match par match avant 2022.
+- Buteurs et cartons match par match : 2022-23 → 2024-25 seulement, et pas pour tous les matchs ;
+  ni compositions, ni temps de jeu, ni tirs, ni coordonnées (pas de zones d'activité).
 - Le réseau ne suit que les joueurs ayant un article Wikipédia (biais vers les grands clubs).
 - 2019-20 (arrêt Covid) et 2020-21 (poules + play-off) : classements recalculés approximatifs.
 

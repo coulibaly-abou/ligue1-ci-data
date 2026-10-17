@@ -16,6 +16,7 @@ from commun import (
     pied_de_page,
     serie_html,
 )
+from indicateurs import phase, voisins
 
 configurer()
 entete("Matchs", "La fiche de chaque match : score, déroulé minute par minute, contexte "
@@ -71,13 +72,28 @@ st.session_state["match_affiche"] = str(id_match)
 st.query_params["match"] = str(id_match)
 m = matchs.set_index("id_match").loc[id_match]
 
+
+def aller(cible: int) -> None:
+    st.session_state["m_match"] = cible
+
+
+# Match précédent / suivant : dans la saison, ou parmi ceux du club filtré
+precedent, suivant = voisins(matchs, id_match, None if club == TOUS else club)
+g, _, d = st.columns([1, 2, 1])
+g.button("Match précédent", icon=":material/arrow_back:", disabled=precedent is None,
+         on_click=aller, args=(precedent,), width="stretch",
+         help=libelles.get(precedent) if precedent else "Premier match de la sélection")
+d.button("Match suivant", icon=":material/arrow_forward:", disabled=suivant is None,
+         on_click=aller, args=(suivant,), width="stretch",
+         help=libelles.get(suivant) if suivant else "Dernier match de la sélection")
+
 # ---------------------------------------------------------------- affiche
 issue = {"D": f"Victoire de {m.dom}", "N": "Match nul", "E": f"Victoire de {m.ext}"}[m.resultat]
 journee = f"Journée {int(m.journee)} · " if pd.notna(m.journee) else ""
 lieu = f" · {m.stade}" if pd.notna(m.stade) else ""
 st.markdown(f"""
 <div class="affiche">
-  <div class="meta">{m.saison} · {m.phase} · {journee}{m.date_match:%d/%m/%Y}{lieu}</div>
+  <div class="meta">{m.saison} · Ligue 1 · {phase(m.phase)} · {journee}{m.date_match:%d/%m/%Y}{lieu}</div>
   <div class="ligne">
     <div class="equipe">{pastille(m.dom, 64)}<span>{m.dom}</span></div>
     <div class="score">{int(m.buts_dom)} – {int(m.buts_ext)}</div>
@@ -88,7 +104,32 @@ st.markdown(f"""
 
 b_match = buts[buts["id_match"] == id_match].sort_values("minute", kind="stable")
 c_match = cartons[cartons["id_match"] == id_match]
-onglets = st.tabs(["Déroulé", "Avant le match", "Face-à-face"])
+onglets = st.tabs(["Déroulé", "Statistiques", "Avant le match", "Face-à-face"])
+
+# ------------------------------------------------------------ statistiques
+with onglets[1]:
+    # « Non publié » n'est jamais remplacé par 0 : une donnée absente n'est pas une valeur
+    NP = "Non publié"
+    deroule = not b_match.empty or (m.buts_dom + m.buts_ext == 0 and
+                                    m.saison in set(buts["saison"]))
+    rouges = c_match[c_match["couleur"].isin(["rouge", "jaune_rouge"])]
+    lignes = [("Buts", int(m.buts_dom), int(m.buts_ext), "RSSSF / Wikipédia"),
+              ("dont penalties", *((int(((b_match["club"] == eq) &
+                                         (b_match["type_but"] == "penalty")).sum())
+                                    for eq in (m.dom, m.ext)) if not b_match.empty
+                                   else (NP, NP)), "API-Football"),
+              ("Cartons rouges", *((int((rouges["club"] == eq).sum()) for eq in (m.dom, m.ext))
+                                   if deroule else (NP, NP)), "API-Football")]
+    lignes += [(nom, NP, NP, "—") for nom in
+               ("Possession", "Tirs", "Tirs cadrés", "Corners", "Cartons jaunes",
+                "Compositions et remplacements", "Formation")]
+    st.dataframe(pd.DataFrame(lignes, columns=["Statistique", m.dom, m.ext, "Source"])
+                 .astype({m.dom: str, m.ext: str}), hide_index=True, width="stretch")
+    st.caption("API-Football et les autres sources gratuites ne publient ni compositions, "
+               "ni statistiques d'équipe pour la Ligue 1 ivoirienne (couverture vérifiée "
+               "saison par saison : `python -m src.collecte.scrapers.api_football`). "
+               "Sportmonks : la Ligue 1 ivoirienne n'est pas dans l'offre gratuite. "
+               "Les champs apparaîtront dès qu'une source les fournira (docs/sources.md).")
 
 # ---------------------------------------------------------------- déroulé
 with onglets[0]:
@@ -162,7 +203,7 @@ with onglets[0]:
                     query_params={"saison": r.saison, "joueur": r.joueur})
 
 # --------------------------------------------------------- avant le match
-with onglets[1]:
+with onglets[2]:
     avant = resultats[resultats["date_match"] < m.date_match.date()] \
         .sort_values("date_match")
 
@@ -206,7 +247,7 @@ with onglets[1]:
                    "(page Prédiction pour la saison en cours).")
 
 # ------------------------------------------------------------ face-à-face
-with onglets[2]:
+with onglets[3]:
     duel = matchs[((matchs["dom"] == m.dom) & (matchs["ext"] == m.ext))
                   | ((matchs["dom"] == m.ext) & (matchs["ext"] == m.dom))] \
         .sort_values("date_match", ascending=False)
