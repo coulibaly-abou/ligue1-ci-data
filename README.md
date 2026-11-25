@@ -85,6 +85,8 @@ make export    # données du tableau de bord : app/data/*.parquet
 make rapport   # figures (docs/figures) + rapport PDF (docs/rapport.pdf)
 make app       # tableau de bord en local : http://localhost:8501
 make pipeline  # collect + etl + train + export
+make graphe    # PostgreSQL -> Neo4j (graphe vidé puis rechargé)
+make requetes-neo4j  # exécute les 5 requêtes Cypher avec des paramètres d'exemple
 ```
 
 Sources (RSSSF, Wikipédia, Futbol24, API-Football) et limites : [docs/sources.md](docs/sources.md).
@@ -103,7 +105,7 @@ Journal : `logs/collecte_quotidienne.log` et `logs/pipeline.log`.
 |---|---|
 | MongoDB | zone brute : HTML archivé (URL, date, SHA-256) et documents tels que collectés, par source |
 | PostgreSQL | zone analytique : 12 tables normalisées (+ 1 vue), 102 variantes de noms harmonisées en 31 clubs (config/clubs_alias.yml), scores recoupés entre sources, classements recalculés identiques aux officiels ; 10 requêtes dans [sql/analyses/](sql/analyses/), vues matérialisées dans [sql/vues_materialisees.sql](sql/vues_materialisees.sql) |
-| Graphe | carrières Wikipédia + transferts API-Football : PageRank, intermédiarité, communautés de Louvain ([src/graphe/analyses.py](src/graphe/analyses.py)) ; calculé avec networkx pour le tableau de bord. **À faire** : chargement dans Neo4j et 5 requêtes Cypher ([cypher/](cypher/) encore vide) |
+| Graphe | carrières Wikipédia + transferts API-Football : PageRank, intermédiarité, communautés de Louvain ([src/graphe/analyses.py](src/graphe/analyses.py)) ; calculé avec networkx pour le tableau de bord. Neo4j : personnes et clubs reliés par `FORME_A`, `A_JOUE_POUR`, `A_ENTRAINE` et `MOUVEMENT` ([src/graphe/chargement_neo4j.py](src/graphe/chargement_neo4j.py)), 5 requêtes Cypher dans [cypher/requetes/](cypher/requetes/) : coéquipiers, plus court chemin entre deux clubs, clubs formateurs, flux vers les clubs hors Ligue 1, parcours d'un joueur |
 
 ## Modélisation
 
@@ -162,7 +164,7 @@ que `app/data/*.parquet` : il se déploie sans base de données.
 | `PG_URL` (et `PG_PASSWORD` pour Docker) | base analytique PostgreSQL | ETL, modèles, export |
 | `API_FOOTBALL_KEY` | clé gratuite api-sports.io (100 requêtes / jour) | collecte des matchs 2022-2024, évènements, effectifs |
 | `USER_AGENT`, `DELAI_REQUETES` | identification et politesse du scraping | collecte |
-| `NEO4J_*` | graphe (optionnel, non utilisé par le tableau de bord) | — |
+| `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD` | base graphe Neo4j (non utilisée par le tableau de bord) | `make graphe`, `make requetes-neo4j` |
 
 Aucune variable n'est nécessaire pour lancer le tableau de bord. `.env` est ignoré par git.
 
@@ -177,7 +179,7 @@ championnats danois et écossais (détails dans [docs/sources.md](docs/sources.m
 
 ### Tests
 
-`make test` : 108 tests, dont les calculs du tableau de bord (bilans, points, classements,
+`make test` : 125 tests, dont les calculs du tableau de bord (bilans, points, classements,
 filtres, navigation entre matchs), la note des joueurs et l'exécution des 10 pages avec les
 interactions (filtres, boutons, recherche) via `streamlit.testing`. Ces derniers sont sautés
 en CI, où Streamlit n'est pas installé.

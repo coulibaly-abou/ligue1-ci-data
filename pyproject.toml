@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.4"]
+graphe = ["neo4j>=5.20"]
 modele = ["scikit-learn>=1.5", "torch>=2.4", "joblib>=1.4", "networkx>=3.3",
           "pyarrow>=15", "matplotlib>=3.8", "reportlab>=4.0", "streamlit>=1.40",
           "plotly>=5.24", "nbformat>=5.10", "nbconvert>=7.16", "ipykernel>=6.29"]

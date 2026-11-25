@@ -25,3 +25,7 @@ video:
 	python -m src.restitution.video
 video-pro:
 	python -m src.restitution.video_pro
+graphe:
+	python -m src.graphe.chargement_neo4j
+requetes-neo4j:
+	python -m src.graphe.requetes
